@@ -251,9 +251,12 @@ function ProfileSidebar() {
 
 function MainCourseCard() {
   const navigate = useNavigate();
-  const { getProgress } = useProgressStore();
+  const { getProgress, lastActiveSystemId } = useProgressStore();
 
   const activeSys =
+    (lastActiveSystemId
+      ? qualitySystems.find((s) => s.id === lastActiveSystemId && getProgress(s.id).completedLevels.length > 0)
+      : undefined) ??
     qualitySystems.find((s) => {
       const p = getProgress(s.id);
       return p.completedLevels.length > 0 && p.completedLevels.length < TOTAL_LEVELS;
