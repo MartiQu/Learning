@@ -52,6 +52,7 @@ export interface QualitySystem {
   description: string;
   color: string; // accent hex
   accentClass: string; // tailwind class name for gradient
+  category: string; // groups related systems (e.g. 'quality-systems')
 }
 
 export interface Level {

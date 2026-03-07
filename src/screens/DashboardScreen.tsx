@@ -327,42 +327,77 @@ function MainCourseCard() {
         </motion.button>
       </div>
 
-      {/* Other courses list */}
-      <div className="px-4 pb-4 space-y-0.5">
-        {qualitySystems
-          .filter((s) => s.id !== activeSys.id)
-          .map((sys) => {
-            const p = getProgress(sys.id);
-            const done = p.completedLevels.length >= TOTAL_LEVELS;
-            const started = p.completedLevels.length > 0;
-            const pct = Math.round((p.completedLevels.length / TOTAL_LEVELS) * 100);
+    </div>
+  );
+}
 
-            return (
-              <button
-                key={sys.id}
-                onClick={() => navigate(`/system/${sys.id}`)}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-all cursor-pointer text-left group"
+// ── Related courses ───────────────────────────────────────────────────────────
+
+function RelatedCourses() {
+  const navigate = useNavigate();
+  const { getProgress, lastActiveSystemId } = useProgressStore();
+
+  const activeSys =
+    (lastActiveSystemId
+      ? qualitySystems.find((s) => s.id === lastActiveSystemId && getProgress(s.id).completedLevels.length > 0)
+      : undefined) ??
+    qualitySystems.find((s) => {
+      const p = getProgress(s.id);
+      return p.completedLevels.length > 0 && p.completedLevels.length < TOTAL_LEVELS;
+    }) ??
+    qualitySystems[0]!;
+  const related = qualitySystems.filter(
+    (s) => s.id !== activeSys.id && s.category === activeSys.category
+  );
+
+  if (related.length === 0) return null;
+
+  return (
+    <div
+      className="rounded-2xl overflow-hidden"
+      style={{ border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.02)' }}
+    >
+      <div className="px-5 pt-4 pb-1">
+        <p className="text-white/30 text-xs font-semibold uppercase tracking-wider">
+          Saistītie kursi
+        </p>
+      </div>
+      <div className="px-2 pb-2">
+        {related.map((sys) => {
+          const p = getProgress(sys.id);
+          const started = p.completedLevels.length > 0;
+          const done = p.completedLevels.length >= TOTAL_LEVELS;
+          const pct = Math.round((p.completedLevels.length / TOTAL_LEVELS) * 100);
+
+          return (
+            <button
+              key={sys.id}
+              onClick={() => navigate(`/system/${sys.id}`)}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-all cursor-pointer text-left group"
+            >
+              <div
+                className="w-9 h-9 rounded-lg flex items-center justify-center text-lg shrink-0"
+                style={{ background: `${sys.color}18` }}
               >
-                <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center text-base shrink-0"
-                  style={{ background: `${sys.color}18` }}
-                >
-                  {sys.icon}
+                {sys.icon}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className={`text-sm font-medium truncate ${started || done ? 'text-white/70' : 'text-white/30'}`}>
+                  {sys.name}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className={`text-sm font-medium truncate ${started || done ? 'text-white/70' : 'text-white/30'}`}>
-                    {sys.name}
+                {started ? (
+                  <div className="mt-1">
+                    <ProgressBar value={pct} color={sys.color} height={2} />
                   </div>
-                  {started && (
-                    <div className="mt-1">
-                      <ProgressBar value={pct} color={sys.color} height={2} />
-                    </div>
-                  )}
-                </div>
-                <span className="text-white/20 group-hover:text-white/50 transition-colors text-sm shrink-0">→</span>
-              </button>
-            );
-          })}
+                ) : (
+                  <div className="text-white/22 text-xs mt-0.5">Nav sākts</div>
+                )}
+              </div>
+              {done && <span className="text-xs font-semibold shrink-0" style={{ color: sys.color }}>✓</span>}
+              {!done && <span className="text-white/20 group-hover:text-white/50 transition-colors text-sm shrink-0">→</span>}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -408,44 +443,6 @@ function DailyMission() {
   );
 }
 
-// ── Course navigation bottom ──────────────────────────────────────────────────
-
-function CourseNav() {
-  const navigate = useNavigate();
-  const { getProgress } = useProgressStore();
-
-  return (
-    <div className="grid grid-cols-4 gap-2">
-      {qualitySystems.map((sys) => {
-        const p = getProgress(sys.id);
-        const pct = Math.round((p.completedLevels.length / TOTAL_LEVELS) * 100);
-        const started = p.completedLevels.length > 0;
-
-        return (
-          <motion.button
-            key={sys.id}
-            onClick={() => navigate(`/system/${sys.id}`)}
-            whileHover={{ y: -2 }}
-            whileTap={{ scale: 0.97 }}
-            className="flex flex-col items-center gap-2 p-3 rounded-xl border border-white/6 hover:border-white/15 hover:bg-white/3 transition-all cursor-pointer"
-          >
-            <span className="text-xl">{sys.icon}</span>
-            <span className="text-white/55 text-xs font-medium leading-tight text-center">{sys.name}</span>
-            <div className="w-full">
-              <ProgressBar value={pct} color={sys.color} height={2} />
-            </div>
-            {started && (
-              <span className="text-xs font-semibold" style={{ color: sys.color }}>
-                {p.completedLevels.length}/{TOTAL_LEVELS}
-              </span>
-            )}
-          </motion.button>
-        );
-      })}
-    </div>
-  );
-}
-
 // ── Main export ───────────────────────────────────────────────────────────────
 
 export function DashboardScreen() {
@@ -482,16 +479,9 @@ export function DashboardScreen() {
             transition={{ duration: 0.4, delay: 0.1 }}
             className="space-y-4"
           >
-            <MainCourseCard />
             <DailyMission />
-
-            {/* Section label */}
-            <div className="pt-2">
-              <p className="text-white/25 text-xs font-semibold uppercase tracking-wider mb-3">
-                Visi kursi
-              </p>
-              <CourseNav />
-            </div>
+            <MainCourseCard />
+            <RelatedCourses />
           </motion.div>
 
         </div>

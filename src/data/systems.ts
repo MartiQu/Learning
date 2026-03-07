@@ -9,6 +9,7 @@ export const qualitySystems: QualitySystem[] = [
       'Starptautiskais kvalitātes vadības sistēmu standarts. Apgūsti procesālo domāšanu, orientāciju uz klientu un nepārtrauktu pilnveidi.',
     color: '#e8c547',
     accentClass: 'from-yellow-500 to-amber-600',
+    category: 'quality-systems',
   },
   {
     id: 'tqm',
@@ -18,6 +19,7 @@ export const qualitySystems: QualitySystem[] = [
       'Holistiska pieeja ilgtermiņa panākumiem caur klientu apmierinātību. Uzzini, kā katrs darbinieks veicina procesu uzlabošanu.',
     color: '#7c6fff',
     accentClass: 'from-violet-500 to-purple-700',
+    category: 'quality-systems',
   },
   {
     id: 'sixsigma',
@@ -27,6 +29,7 @@ export const qualitySystems: QualitySystem[] = [
       'Uz datiem balstīta metodoloģija defektu novēršanai. Apgūsti DMAIC ciklu, statistiskos rīkus un procesu variāciju samazināšanu.',
     color: '#4ecdc4',
     accentClass: 'from-teal-400 to-cyan-600',
+    category: 'quality-systems',
   },
   {
     id: 'lean',
@@ -36,5 +39,6 @@ export const qualitySystems: QualitySystem[] = [
       'Maksimizē vērtību, minimizējot izšķērdību. Izproti 8 izšķērdību veidus, vērtību plūsmas kartēšanu un vilkšanas sistēmas.',
     color: '#ff6b6b',
     accentClass: 'from-rose-500 to-red-700',
+    category: 'quality-systems',
   },
 ];
