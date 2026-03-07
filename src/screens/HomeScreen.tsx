@@ -24,7 +24,7 @@ function Navbar({ onLoginClick }: { onLoginClick: () => void }) {
       {user ? (
         <div className="flex items-center gap-3">
           <button
-            onClick={() => navigate('/profile')}
+            onClick={() => navigate('/home')}
             className="flex items-center gap-2 cursor-pointer group"
           >
             <img
@@ -372,7 +372,7 @@ export function HomeScreen() {
           <motion.button
             whileHover={{ scale: 1.03, y: -3 }}
             whileTap={{ scale: 0.97 }}
-            onClick={() => user ? navigate('/select') : setAuthOpen(true)}
+            onClick={() => user ? navigate('/home') : setAuthOpen(true)}
             className="py-4 px-12 rounded-full text-white font-bold text-lg cursor-pointer"
             style={{
               background: 'linear-gradient(135deg, #22c55e, #16a34a)',

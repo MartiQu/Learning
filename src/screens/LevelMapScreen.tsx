@@ -32,7 +32,7 @@ export function LevelMapScreen() {
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
         <button
-          onClick={() => navigate('/select')}
+          onClick={() => navigate('/home')}
           className="text-white/40 hover:text-white/70 text-sm mb-4 transition-colors flex items-center gap-1"
         >
           ← Visas sistēmas
