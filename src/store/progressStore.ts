@@ -4,6 +4,8 @@ import type { UserProgress } from '../types';
 
 interface ProgressState {
   progress: Record<string, UserProgress>; // keyed by systemId
+  streakDays: number;
+  lastActivityDate: string; // 'YYYY-MM-DD'
   addXP: (systemId: string, xp: number) => void;
   completeLevel: (systemId: string, levelNumber: number, stars: number, xp: number) => void;
   isLevelUnlocked: (systemId: string, levelNumber: number) => boolean;
@@ -22,6 +24,8 @@ export const useProgressStore = create<ProgressState>()(
   persist(
     (set, get) => ({
       progress: {},
+      streakDays: 0,
+      lastActivityDate: '',
 
       getProgress(systemId) {
         return get().progress[systemId] ?? defaultProgress(systemId);
@@ -47,11 +51,20 @@ export const useProgressStore = create<ProgressState>()(
       },
 
       completeLevel(systemId, levelNumber, stars, xp) {
+        const today = new Date().toISOString().split('T')[0];
+        const { lastActivityDate, streakDays } = get();
+        let newStreak = streakDays;
+        if (lastActivityDate !== today) {
+          const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+          newStreak = lastActivityDate === yesterday ? streakDays + 1 : 1;
+        }
         set((state) => {
           const current = state.progress[systemId] ?? defaultProgress(systemId);
           const alreadyCompleted = current.completedLevels.includes(levelNumber);
           const existingStars = current.levelStars[levelNumber] ?? 0;
           return {
+            streakDays: newStreak,
+            lastActivityDate: today,
             progress: {
               ...state.progress,
               [systemId]: {
@@ -71,7 +84,7 @@ export const useProgressStore = create<ProgressState>()(
       },
 
       reset() {
-        set({ progress: {} });
+        set({ progress: {}, streakDays: 0, lastActivityDate: '' });
       },
     }),
     { name: 'qs-progress' }

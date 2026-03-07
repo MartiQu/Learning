@@ -12,6 +12,8 @@ import { Matching } from '../components/questions/Matching';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import type { Question } from '../types';
 
+type FeedbackState = 'idle' | 'correct' | 'incorrect';
+
 function QuestionRenderer({
   question,
   onAnswer,
@@ -97,9 +99,10 @@ export function GameScreen() {
   const navigate = useNavigate();
   const { session, submitAnswer, nextQuestion, finishSession } = useGameStore();
 
-  const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
+  const [feedbackState, setFeedbackState] = useState<FeedbackState>('idle');
   const [revealed, setRevealed] = useState<string | string[] | Record<string, string> | null>(null);
   const [answered, setAnswered] = useState(false);
+  const [showExplanation, setShowExplanation] = useState(false);
 
   const system = qualitySystems.find((s) => s.id === systemId);
 
@@ -111,7 +114,7 @@ export function GameScreen() {
 
   const question = session.questions[session.currentIndex];
   const isLast = session.currentIndex >= session.questions.length - 1;
-  const progress = ((session.currentIndex) / session.questions.length) * 100;
+  const progress = (session.currentIndex / session.questions.length) * 100;
 
   if (!question) {
     finishSession();
@@ -122,40 +125,55 @@ export function GameScreen() {
   const handleAnswer = (ans: string | string[] | Record<string, string>) => {
     if (answered) return;
     const correct = submitAnswer(ans);
-    setIsCorrect(correct);
+    setFeedbackState(correct ? 'correct' : 'incorrect');
     setRevealed(question.correctAnswer);
     setAnswered(true);
+    setShowExplanation(false);
   };
 
   const handleNext = () => {
-    if (isLast) {
+    // 0 lives or last question → finish
+    if (session.lives === 0 || isLast) {
       finishSession();
       navigate(`/system/${systemId}/level/${levelNumber}/result`);
-    } else {
-      nextQuestion();
-      setIsCorrect(null);
-      setRevealed(null);
-      setAnswered(false);
+      return;
     }
+    nextQuestion();
+    setFeedbackState('idle');
+    setRevealed(null);
+    setAnswered(false);
+    setShowExplanation(false);
   };
 
+  const hearts = Array.from({ length: 3 }, (_, i) => i < session.lives);
+
   return (
-    <div className="min-h-screen px-4 py-6 max-w-2xl mx-auto">
+    <div className="min-h-screen px-4 py-6 max-w-2xl mx-auto pb-48">
       {/* Top bar */}
       <div className="flex items-center gap-4 mb-6">
         <button
           onClick={() => navigate(`/system/${systemId}`)}
-          className="text-white/40 hover:text-white/70 text-sm transition-colors"
+          className="text-white/40 hover:text-white/70 text-sm transition-colors shrink-0"
         >
           ✕
         </button>
         <ProgressBar value={progress} color={system.color} className="flex-1" height={6} />
-        <div className="text-white/50 text-sm shrink-0">
-          {session.currentIndex + 1}/{session.questions.length}
+        {/* Hearts */}
+        <div className="flex gap-1 shrink-0">
+          {hearts.map((alive, i) => (
+            <motion.span
+              key={i}
+              initial={false}
+              animate={{ scale: alive ? 1 : 0.8, opacity: alive ? 1 : 0.3 }}
+              className="text-lg"
+            >
+              {alive ? '❤️' : '🖤'}
+            </motion.span>
+          ))}
         </div>
       </div>
 
-      {/* Streak & XP */}
+      {/* Progress counter + streak */}
       <div className="flex items-center gap-3 mb-6">
         {session.streak >= 2 && (
           <motion.div
@@ -168,7 +186,7 @@ export function GameScreen() {
           </motion.div>
         )}
         <div className="text-white/40 text-sm ml-auto">
-          <span className="text-gold font-semibold">{session.xpGained}</span> XP nopelnīti
+          {session.currentIndex + 1}/{session.questions.length}
         </div>
       </div>
 
@@ -181,19 +199,16 @@ export function GameScreen() {
           exit={{ opacity: 0, x: -30 }}
           transition={{ duration: 0.25 }}
         >
-          {/* Type badge */}
           <div className="flex items-center gap-2 mb-3">
             <span className="text-xs font-semibold uppercase tracking-wider text-white/30">
               {TYPE_LABELS[question.type] ?? question.type}
             </span>
           </div>
 
-          {/* Prompt */}
           <h2 className="font-heading text-2xl font-bold text-white mb-6 leading-snug">
             {question.prompt}
           </h2>
 
-          {/* Question component */}
           <QuestionRenderer
             question={question}
             onAnswer={handleAnswer}
@@ -203,37 +218,85 @@ export function GameScreen() {
         </motion.div>
       </AnimatePresence>
 
-      {/* Feedback + Next */}
+      {/* Feedback panel — fixed slide-up */}
       <AnimatePresence>
-        {answered && (
+        {feedbackState !== 'idle' && (
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-6"
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
+            transition={{ type: 'spring', stiffness: 420, damping: 38 }}
+            className={`fixed bottom-0 left-0 right-0 px-4 pb-8 pt-5 rounded-t-3xl border-t ${
+              feedbackState === 'correct'
+                ? 'bg-[#0a0a0f] border-teal/30'
+                : 'bg-[#0a0a0f] border-red-500/30'
+            }`}
+            style={{
+              background:
+                feedbackState === 'correct'
+                  ? 'linear-gradient(to top, #0a0a0f, #0d1c1c)'
+                  : 'linear-gradient(to top, #0a0a0f, #1a0d0d)',
+            }}
           >
-            {/* Feedback bar */}
-            <div
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl mb-4 ${
-                isCorrect
-                  ? 'bg-teal/15 border border-teal/30 text-teal'
-                  : 'bg-red-500/15 border border-red-500/30 text-red-400'
-              }`}
-            >
-              <span className="text-2xl">{isCorrect ? '🎉' : '💡'}</span>
-              <span className="font-semibold">
-                {isCorrect
-                  ? `Pareizi! +${50 + session.streak * 10} XP`
-                  : 'Nav pareizi — apskatiet atbildi augstāk'}
-              </span>
-            </div>
+            <div className="max-w-2xl mx-auto">
+              {/* Header row */}
+              <div className="flex items-center gap-3 mb-3">
+                <span className="text-2xl">
+                  {feedbackState === 'correct' ? '🎉' : '💡'}
+                </span>
+                <div className="flex-1">
+                  <p
+                    className={`font-heading font-bold text-lg ${
+                      feedbackState === 'correct' ? 'text-teal' : 'text-red-400'
+                    }`}
+                  >
+                    {feedbackState === 'correct'
+                      ? `Pareizi! +${session.lastXpGained} XP`
+                      : 'Nav pareizi'}
+                  </p>
+                </div>
+                {question.explanation && (
+                  <button
+                    onClick={() => setShowExplanation((v) => !v)}
+                    className="text-xs px-3 py-1.5 rounded-full border border-white/20 text-white/60 hover:text-white/90 transition-colors shrink-0"
+                  >
+                    {showExplanation ? 'Aizvērt' : 'Kāpēc?'}
+                  </button>
+                )}
+              </div>
 
-            <button
-              onClick={handleNext}
-              className="w-full py-4 rounded-2xl font-semibold text-black text-lg transition-all hover:opacity-90 cursor-pointer"
-              style={{ background: `linear-gradient(135deg, ${system.color}, ${system.color}cc)` }}
-            >
-              {isLast ? 'Skatīt rezultātus →' : 'Nākamais jautājums →'}
-            </button>
+              {/* Explanation */}
+              <AnimatePresence>
+                {showExplanation && question.explanation && (
+                  <motion.p
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="text-white/60 text-sm mb-3 leading-relaxed overflow-hidden"
+                  >
+                    {question.explanation}
+                  </motion.p>
+                )}
+              </AnimatePresence>
+
+              {/* Continue button */}
+              <button
+                onClick={handleNext}
+                className="w-full py-4 rounded-2xl font-semibold text-black text-lg transition-all hover:opacity-90 cursor-pointer"
+                style={{
+                  background:
+                    feedbackState === 'correct'
+                      ? `linear-gradient(135deg, #4ecdc4, #4ecdc4cc)`
+                      : `linear-gradient(135deg, #ff6b6b, #ff6b6bcc)`,
+                }}
+              >
+                {session.lives === 0
+                  ? 'Skatīt rezultātus →'
+                  : isLast
+                  ? 'Skatīt rezultātus →'
+                  : 'Turpināt →'}
+              </button>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

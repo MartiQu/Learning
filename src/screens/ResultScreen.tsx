@@ -1,13 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useGameStore } from '../store/gameStore';
 import { useProgressStore } from '../store/progressStore';
+import { useBadgeStore } from '../store/badgeStore';
 import { qualitySystems } from '../data/systems';
 import { levels } from '../data/levels';
 import { Confetti } from '../components/ui/Confetti';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
+import { StreakModal } from '../components/ui/StreakModal';
+import { BadgeModal } from '../components/ui/BadgeModal';
 
 function starsFromScore(pct: number) {
   if (pct >= 95) return 3;
@@ -20,8 +23,16 @@ export function ResultScreen() {
   const { systemId, levelNumber } = useParams<{ systemId: string; levelNumber: string }>();
   const navigate = useNavigate();
   const { session, clearSession } = useGameStore();
-  const { completeLevel } = useProgressStore();
+  const { completeLevel, streakDays } = useProgressStore();
+  const { checkAndAward } = useBadgeStore();
   const [saved, setSaved] = useState(false);
+
+  // Modal queue state
+  const [showStreakModal, setShowStreakModal] = useState(false);
+  const [badgeQueue, setBadgeQueue] = useState<string[]>([]);
+  const [currentBadgeId, setCurrentBadgeId] = useState<string | null>(null);
+
+  const prevStreakRef = useRef(streakDays);
 
   const lvlNum = parseInt(levelNumber ?? '1', 10);
   const system = qualitySystems.find((s) => s.id === systemId);
@@ -36,16 +47,70 @@ export function ResultScreen() {
 
   useEffect(() => {
     if (!session || !session.finished || saved) return;
+    setSaved(true);
+
+    const prevStreak = prevStreakRef.current;
+
     if (passed) {
       completeLevel(systemId!, lvlNum, stars, xpGained);
     }
-    setSaved(true);
-  }, [session, passed, saved, systemId, lvlNum, stars, xpGained, completeLevel]);
+
+    // Read updated state directly from store
+    const updatedProgress = useProgressStore.getState();
+    const newStreak = updatedProgress.streakDays;
+    const totalXP = Object.values(updatedProgress.progress).reduce(
+      (sum, p) => sum + p.totalXP,
+      0
+    );
+    const totalCompleted = Object.values(updatedProgress.progress).flatMap(
+      (p) => p.completedLevels
+    ).length;
+
+    // Check if the current system is fully completed (all 10 levels)
+    const sysProgress = updatedProgress.progress[systemId!];
+    const systemCompleted = passed && (sysProgress?.completedLevels.length ?? 0) >= 10;
+
+    const newBadges = checkAndAward({
+      totalCompletedLevels: totalCompleted,
+      perfectScore: pct === 100,
+      streakDays: newStreak,
+      totalXP,
+      systemCompleted,
+    });
+
+    // Queue modals: streak first, then badges
+    const streakIncreased = passed && newStreak > prevStreak;
+
+    if (streakIncreased) {
+      setShowStreakModal(true);
+      setBadgeQueue(newBadges);
+    } else if (newBadges.length > 0) {
+      setCurrentBadgeId(newBadges[0]);
+      setBadgeQueue(newBadges.slice(1));
+    }
+  }, [session, passed, saved, systemId, lvlNum, stars, xpGained, completeLevel, checkAndAward, pct]);
 
   if (!session || !system || !level) {
     navigate(`/system/${systemId}`);
     return null;
   }
+
+  const handleStreakClose = () => {
+    setShowStreakModal(false);
+    if (badgeQueue.length > 0) {
+      setCurrentBadgeId(badgeQueue[0]);
+      setBadgeQueue((q) => q.slice(1));
+    }
+  };
+
+  const handleBadgeClose = () => {
+    if (badgeQueue.length > 0) {
+      setCurrentBadgeId(badgeQueue[0]);
+      setBadgeQueue((q) => q.slice(1));
+    } else {
+      setCurrentBadgeId(null);
+    }
+  };
 
   const handleNext = () => {
     clearSession();
@@ -64,6 +129,16 @@ export function ResultScreen() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-10">
       <Confetti active={passed} />
+
+      {/* Streak modal */}
+      <StreakModal
+        open={showStreakModal}
+        streakDays={useProgressStore.getState().streakDays}
+        onContinue={handleStreakClose}
+      />
+
+      {/* Badge modal */}
+      <BadgeModal badgeId={currentBadgeId} onContinue={handleBadgeClose} />
 
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
@@ -209,7 +284,14 @@ export function ResultScreen() {
                 Mēģināt vēlreiz
               </Button>
             )}
-            <Button onClick={() => { clearSession(); navigate(`/system/${systemId}`); }} fullWidth variant="secondary">
+            <Button
+              onClick={() => {
+                clearSession();
+                navigate(`/system/${systemId}`);
+              }}
+              fullWidth
+              variant="secondary"
+            >
               Atpakaļ uz līmeņu karti
             </Button>
           </div>

@@ -75,6 +75,8 @@ export interface Question {
    *  For CaseStudy: id of the "best" option.
    *  For Matching: Record<leftId, rightId>. */
   correctAnswer: string | string[] | Record<string, string>;
+  explanation?: string;
+  xpReward?: number;
 }
 
 // ─── User progress ────────────────────────────────────────────────────────────
@@ -98,5 +100,7 @@ export interface GameSession {
   score: number; // correct answers count
   streak: number;
   xpGained: number;
+  lives: number;
+  lastXpGained: number;
   finished: boolean;
 }

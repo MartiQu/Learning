@@ -18,6 +18,8 @@ export const questions: Question[] = [
       ],
     },
     correctAnswer: 'b',
+    explanation: 'ISO 9001:2015 balstās uz 7 kvalitātes vadības principiem: orientācija uz klientu, līderība, cilvēku iesaiste, procesu pieeja, uzlabošana, uz pierādījumiem balstīti lēmumi un attiecību vadība.',
+    xpReward: 60,
   },
   {
     id: 'iso9001-1-q2',
@@ -26,6 +28,7 @@ export const questions: Question[] = [
     prompt: 'ISO 9001:2015 pieprasa, lai organizācijai būtu īpašs Kvalitātes vadītāja amats.',
     data: { statement: 'ISO 9001:2015 pieprasa, lai organizācijai būtu īpašs Kvalitātes vadītāja amats.' },
     correctAnswer: 'false',
+    explanation: 'ISO 9001:2015 atteicās no obligātās "Kvalitātes vadītāja" prasības. Atbildība par KVS tiek sadalīta vadībai kopumā, veicinot lielāku iesaistīšanos visā organizācijā.',
   },
   {
     id: 'iso9001-1-q3',
@@ -77,6 +80,8 @@ export const questions: Question[] = [
       ],
     },
     correctAnswer: ['plan', 'do', 'check', 'act'],
+    explanation: 'PDCA (Plāno-Dari-Pārbaudi-Rīkojies) ir iteratīvs cikls. Vispirms nospraud mērķus (Plāno), tad ievies (Dari), pēc tam uzraudi rezultātus (Pārbaudi) un veic korekcijas (Rīkojies).',
+    xpReward: 75,
   },
   {
     id: 'iso9001-2-q2',
@@ -378,5 +383,57 @@ export const questions: Question[] = [
       after: ', kur nosaka mērķus un procesus.',
     },
     correctAnswer: 'Plāno',
+    explanation: 'PDCA cikla "P" fāzē tiek noteikti mērķi, identificēti riski un iespējas, un izveidots rīcības plāns. Labas plānošanas kvalitāte tieši ietekmē cikla efektivitāti.',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ISO 9001 – 1. līmenis: bonusa jautājumi ar paplašinātiem DragSort
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
+    id: 'iso9001-1-q5',
+    levelId: 'iso9001-1',
+    type: 'DragSort',
+    prompt: 'Sakārto ISO 9001 sertifikācijas procesa galvenos posmus pareizā secībā.',
+    data: {
+      items: [
+        { id: 'gap', text: 'Robu analīze — novērtē pašreizējo stāvokli' },
+        { id: 'cert', text: 'Sertifikācijas audits — 2. posms' },
+        { id: 'impl', text: 'KVS ieviešana un dokumentēšana' },
+        { id: 'internal', text: 'Iekšējais audits un vadības pārskats' },
+        { id: 'stage1', text: 'Dokumentācijas pārskatīšana — 1. posms' },
+      ],
+    },
+    correctAnswer: ['gap', 'impl', 'internal', 'stage1', 'cert'],
+    explanation: 'Sertifikācijas ceļš: sāc ar robu analīzi, ievies KVS, veic iekšējos auditus, pēc tam ārējais auditors pārskata dokumentāciju (1. posms) un veic pilno auditu (2. posms).',
+    xpReward: 80,
+  },
+  {
+    id: 'iso9001-1-q6',
+    levelId: 'iso9001-1',
+    type: 'MultipleChoice',
+    prompt: 'Kurš no šiem IR viens no 7 ISO 9001:2015 kvalitātes vadības principiem?',
+    data: {
+      options: [
+        { id: 'a', text: 'Nulles defekti' },
+        { id: 'b', text: 'Attiecību vadība' },
+        { id: 'c', text: 'Six Sigma' },
+        { id: 'd', text: 'Kaizen' },
+      ],
+    },
+    correctAnswer: 'b',
+    explanation: 'Attiecību vadība (Relationship Management) ir viens no 7 ISO 9001:2015 principiem. Tā uzsver ilgtermiņa partnerattiecību veidošanu ar piegādātājiem un ieinteresētajām pusēm savstarpējai labklājībai.',
+    xpReward: 60,
+  },
+  {
+    id: 'iso9001-1-q7',
+    levelId: 'iso9001-1',
+    type: 'TrueFalse',
+    prompt: 'ISO 9001:2015 pieprasa, lai organizācija dokumentētu visus savus procesus formālās procedūrās.',
+    data: {
+      statement: 'ISO 9001:2015 pieprasa, lai organizācija dokumentētu visus savus procesus formālās procedūrās.',
+    },
+    correctAnswer: 'false',
+    explanation: 'ISO 9001:2015 ir elastīgāks nekā iepriekšējās versijas. Organizācijai pašai jānosaka, kāda dokumentācija nepieciešama efektīvai KVS darbībai — nav obligātu procedūru saraksta.',
+    xpReward: 50,
   },
 ];

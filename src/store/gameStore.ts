@@ -28,6 +28,8 @@ export const useGameStore = create<GameState>()((set, get) => ({
         score: 0,
         streak: 0,
         xpGained: 0,
+        lives: 3,
+        lastXpGained: 0,
         finished: false,
       },
     });
@@ -42,7 +44,9 @@ export const useGameStore = create<GameState>()((set, get) => ({
 
     const isCorrect = checkAnswer(answer, question.correctAnswer);
     const newStreak = isCorrect ? session.streak + 1 : 0;
-    const xpGain = isCorrect ? XP_PER_CORRECT + newStreak * STREAK_BONUS : 0;
+    const baseXp = question.xpReward ?? XP_PER_CORRECT;
+    const xpGain = isCorrect ? baseXp + newStreak * STREAK_BONUS : 0;
+    const newLives = isCorrect ? session.lives : Math.max(0, session.lives - 1);
 
     set({
       session: {
@@ -51,6 +55,8 @@ export const useGameStore = create<GameState>()((set, get) => ({
         score: isCorrect ? session.score + 1 : session.score,
         streak: newStreak,
         xpGained: session.xpGained + xpGain,
+        lives: newLives,
+        lastXpGained: xpGain,
       },
     });
 
