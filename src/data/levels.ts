@@ -204,4 +204,106 @@ export const levels: Level[] = [
       'Izstrādā un īsteno pilnu TKV ieviešanas ceļvedi organizācijai, integrējot visus principus.',
     minPassScore: 70,
   },
+
+  // ── 7S sistēma ────────────────────────────────────────────────────────────
+  {
+    id: '7s-1',
+    systemId: '7s',
+    levelNumber: 1,
+    title: '7S Ievads',
+    topic: 'Vēsture, 7 elementi un sistēmas būtība',
+    description:
+      'Iepazīsties ar 7S sistēmas izcelsmi, uzzini, kā 5S paplašinājās par 7S, un apgūsti visus septiņus elementus.',
+    minPassScore: 70,
+  },
+  {
+    id: '7s-2',
+    systemId: '7s',
+    levelNumber: 2,
+    title: 'Šķirot',
+    topic: 'Seiri — atlase, sarkanā birka, karantīna',
+    description:
+      'Apgūsti pirmā S principu: kā atdalīt vajadzīgo no nevajadzīgā, izmantojot sarkanās birkas un karantīnas zonu.',
+    minPassScore: 70,
+  },
+  {
+    id: '7s-3',
+    systemId: '7s',
+    levelNumber: 3,
+    title: 'Sakārtot',
+    topic: 'Seiton — kārtīgums, 30 sekunžu likums, 4 soļi',
+    description:
+      'Izproti, kā katram priekšmetam noteikt vietu tā, lai jebko varētu atrast 30 sekundēs, un apgūsti 4 Seiton soļus.',
+    minPassScore: 70,
+  },
+  {
+    id: '7s-4',
+    systemId: '7s',
+    levelNumber: 4,
+    title: 'Spodrināt',
+    topic: 'Seiso — tīrīšanas principi un pienākumi',
+    description:
+      'Uzzini, kā Seiso pārveido tīrīšanu no pienākuma par kultūru, kur visi — no direktora līdz strādniekam — uztur tīrību.',
+    minPassScore: 70,
+  },
+  {
+    id: '7s-5',
+    systemId: '7s',
+    levelNumber: 5,
+    title: 'Standartizēt',
+    topic: 'Seiketsu — vizuālā kontrole, krāsu kodi',
+    description:
+      'Apgūsti, kā vizuālā kontrole, krāsu kodi un caurspīdīgums padara standartus redzamus un saprotamus ikvienam.',
+    minPassScore: 75,
+  },
+  {
+    id: '7s-6',
+    systemId: '7s',
+    levelNumber: 6,
+    title: 'Stiprināt',
+    topic: 'Shitsuke — disciplīna un paradumi',
+    description:
+      'Izproti, kā 7S prasības pārvērst par ikdienas paradumiem un kā vadītāja personīgais piemērs nodrošina ilgtspēju.',
+    minPassScore: 75,
+  },
+  {
+    id: '7s-7',
+    systemId: '7s',
+    levelNumber: 7,
+    title: 'Sargāt',
+    topic: 'Safety — Poka-yoke, bīstamo zonu marķēšana',
+    description:
+      'Uzzini, kā drošība integrējas 7S sistēmā: Poka-yoke metodes, bīstamo zonu vizuālie signāli un regulāras pārbaudes.',
+    minPassScore: 75,
+  },
+  {
+    id: '7s-8',
+    systemId: '7s',
+    levelNumber: 8,
+    title: 'Komandas gars',
+    topic: 'Spirit — darbinieku iesaiste, kultūra',
+    description:
+      'Apgūsti septīto elementu: kā brīvprātīga darbinieku iesaiste un darba grupu principi veido ilgtspējīgu 7S kultūru.',
+    minPassScore: 75,
+  },
+  {
+    id: '7s-9',
+    systemId: '7s',
+    levelNumber: 9,
+    title: '7S Rīki',
+    topic: 'Spageti diagramma, kontroles lapas, Kaizen',
+    description:
+      'Iepazīsties ar praktiskajiem 7S rīkiem: spageti diagramma, sarkanās birkas metode, kontroles lapas un Kaizen principi.',
+    minPassScore: 80,
+  },
+  {
+    id: '7s-10',
+    systemId: '7s',
+    levelNumber: 10,
+    title: 'Meistarība',
+    topic: 'Ieviešana, efektivitāte, integrācija',
+    description:
+      'Apkopo visus 7S elementus un izproti, kā veiksmīga ieviešana paaugstina ekonomisko efektivitāti un sagatavo pamatu citām sistēmām.',
+    minPassScore: 80,
+  },
 ];

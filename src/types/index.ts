@@ -77,6 +77,7 @@ export interface Question {
    *  For Matching: Record<leftId, rightId>. */
   correctAnswer: string | string[] | Record<string, string>;
   explanation?: string;
+  hint?: string;
   xpReward?: number;
 }
 

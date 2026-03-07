@@ -112,9 +112,9 @@ export const BADGE_DEFS: BadgeDef[] = [
     getProgress: (d) => ({ current: Math.min(d.streakDays, 30), total: 30, unit: 'dienas' }),
   },
   {
-    id: 'explorer', label: 'Pētnieks', description: 'Tu izmēģināji visas 4 mācību sistēmas!',
+    id: 'explorer', label: 'Pētnieks', description: 'Tu izmēģināji visas 5 mācību sistēmas!',
     icon: '🌌', tier: 'secret', color: T.secret, secret: true,
-    getProgress: (d) => ({ current: Math.min(d.systemsStarted, 4), total: 4, unit: 'sistēmas' }),
+    getProgress: (d) => ({ current: Math.min(d.systemsStarted, 5), total: 5, unit: 'sistēmas' }),
   },
 ];
 

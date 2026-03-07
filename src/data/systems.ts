@@ -41,4 +41,14 @@ export const qualitySystems: QualitySystem[] = [
     accentClass: 'from-rose-500 to-red-700',
     category: 'quality-systems',
   },
+  {
+    id: '7s',
+    name: '7S sistēma',
+    icon: '🏭',
+    description:
+      'Darbavietas organizācijas metode: Šķirot, Sakārtot, Spodrināt, Standartizēt, Stiprināt, Sargāt un Komandas gars. Apgūsti, kā radīt drošu, tīru un produktīvu darba vidi.',
+    color: '#f97316',
+    accentClass: 'from-orange-500 to-amber-600',
+    category: 'quality-systems',
+  },
 ];

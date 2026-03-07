@@ -103,6 +103,7 @@ export function GameScreen() {
   const [revealed, setRevealed] = useState<string | string[] | Record<string, string> | null>(null);
   const [answered, setAnswered] = useState(false);
   const [showExplanation, setShowExplanation] = useState(false);
+  const [hintVisible, setHintVisible] = useState(false);
 
   const system = qualitySystems.find((s) => s.id === systemId);
 
@@ -143,6 +144,7 @@ export function GameScreen() {
     setRevealed(null);
     setAnswered(false);
     setShowExplanation(false);
+    setHintVisible(false);
   };
 
   const hearts = Array.from({ length: 3 }, (_, i) => i < session.lives);
@@ -205,9 +207,39 @@ export function GameScreen() {
             </span>
           </div>
 
-          <h2 className="font-heading text-2xl font-bold text-white mb-6 leading-snug">
+          <h2 className="font-heading text-2xl font-bold text-white mb-4 leading-snug">
             {question.prompt}
           </h2>
+
+          {question.hint && (
+            <div className="mb-6">
+              <button
+                onClick={() => setHintVisible(true)}
+                disabled={hintVisible}
+                className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full transition-all cursor-pointer"
+                style={{
+                  background: hintVisible ? 'rgba(255,255,255,0.04)' : 'rgba(255,200,50,0.10)',
+                  color: hintVisible ? 'rgba(255,255,255,0.25)' : 'rgba(255,200,50,0.75)',
+                  border: `1px solid ${hintVisible ? 'rgba(255,255,255,0.06)' : 'rgba(255,200,50,0.20)'}`,
+                }}
+              >
+                💡 {hintVisible ? 'Padoms izmantots' : 'Rādīt padomu'}
+              </button>
+              <AnimatePresence>
+                {hintVisible && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                    animate={{ opacity: 1, height: 'auto', marginTop: 8 }}
+                    exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                    className="text-sm rounded-xl px-4 py-3"
+                    style={{ background: 'rgba(255,200,50,0.07)', color: 'rgba(255,255,255,0.55)', border: '1px solid rgba(255,200,50,0.12)' }}
+                  >
+                    {question.hint}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
 
           <QuestionRenderer
             question={question}
