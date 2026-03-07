@@ -92,7 +92,7 @@ function CourseCard({ system, index }: { system: typeof qualitySystems[number]; 
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.05 + index * 0.07 }}
       onClick={handleClick}
-      className="group bg-surface rounded-2xl border border-white/8 overflow-hidden cursor-pointer transition-all hover:border-white/20"
+      className="group bg-surface rounded-2xl border border-white/8 overflow-hidden cursor-pointer transition-all hover:border-white/20 flex flex-col"
       style={{ borderColor: started ? `${system.color}30` : undefined }}
     >
       {/* Ilustrācijas zona */}
@@ -127,7 +127,7 @@ function CourseCard({ system, index }: { system: typeof qualitySystems[number]; 
       </div>
 
       {/* Info */}
-      <div className="p-5">
+      <div className="p-5 flex flex-col flex-1">
         {/* Virsraksts + grūtības pakāpe */}
         <div className="flex items-start justify-between gap-2 mb-2">
           <h3 className="font-bold text-white text-base leading-tight">{system.name}</h3>
@@ -139,8 +139,8 @@ function CourseCard({ system, index }: { system: typeof qualitySystems[number]; 
           </span>
         </div>
 
-        {/* Apraksts */}
-        <p className="text-white/40 text-sm leading-relaxed mb-4 line-clamp-2">
+        {/* Apraksts — fiksēts augstums */}
+        <p className="text-white/40 text-sm leading-relaxed mb-4 line-clamp-2 min-h-[2.5rem]">
           {system.description}
         </p>
 
@@ -153,17 +153,15 @@ function CourseCard({ system, index }: { system: typeof qualitySystems[number]; 
           <ProgressBar value={pct} color={system.color} height={5} />
         </div>
 
-        {/* Poga */}
-        <button
-          className="w-full py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer"
-          style={
-            started
-              ? { background: `${system.color}20`, color: system.color, border: `1px solid ${system.color}40` }
-              : { background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.1)' }
-          }
-        >
-          {done ? '🏆 Apskatīt' : started ? 'Turpināt →' : 'Sākt kursu'}
-        </button>
+        {/* Poga — vienmēr apakšā */}
+        <div className="mt-auto">
+          <button
+            className="w-full py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer"
+            style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.1)' }}
+          >
+            {done ? '🏆 Apskatīt' : started ? 'Turpināt →' : 'Sākt kursu'}
+          </button>
+        </div>
       </div>
     </motion.div>
   );
