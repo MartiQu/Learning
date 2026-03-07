@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { logOut } from '../lib/firebase';
 import { useAuthStore } from '../store/authStore';
 import { AuthModal } from '../components/ui/AuthModal';
+import { Logo } from '../components/ui/Logo';
 
 // ── Navbar ────────────────────────────────────────────────────────────────────
 function Navbar({ onLoginClick }: { onLoginClick: () => void }) {
@@ -15,10 +16,8 @@ function Navbar({ onLoginClick }: { onLoginClick: () => void }) {
       style={{ background: 'rgba(10,10,15,0.90)', backdropFilter: 'blur(12px)' }}>
 
       {/* Logo */}
-      <button onClick={() => navigate('/')} className="cursor-pointer">
-        <span className="font-heading font-extrabold text-white text-xl tracking-tight">
-          QS Meistars
-        </span>
+      <button onClick={() => navigate('/')} className="cursor-pointer text-white hover:opacity-75 transition-opacity">
+        <Logo height={22} color="currentColor" />
       </button>
 
       {/* Auth */}
