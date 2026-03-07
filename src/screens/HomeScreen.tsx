@@ -24,12 +24,19 @@ function Navbar({ onLoginClick }: { onLoginClick: () => void }) {
       {/* Auth */}
       {user ? (
         <div className="flex items-center gap-3">
-          <img
-            src={user.photoURL ?? undefined}
-            alt={user.displayName ?? ''}
-            className="w-8 h-8 rounded-full border-2 border-white/20"
-          />
-          <span className="text-white/70 text-sm hidden sm:block">{user.displayName}</span>
+          <button
+            onClick={() => navigate('/profile')}
+            className="flex items-center gap-2 cursor-pointer group"
+          >
+            <img
+              src={user.photoURL ?? undefined}
+              alt={user.displayName ?? ''}
+              className="w-8 h-8 rounded-full border-2 border-white/20 group-hover:border-white/50 transition-colors"
+            />
+            <span className="text-white/70 text-sm hidden sm:block group-hover:text-white transition-colors">
+              {user.displayName}
+            </span>
+          </button>
           <button
             onClick={() => logOut()}
             className="text-sm text-white/50 hover:text-white transition-colors cursor-pointer px-3 py-1.5 rounded-full border border-white/15 hover:border-white/30">
@@ -47,89 +54,6 @@ function Navbar({ onLoginClick }: { onLoginClick: () => void }) {
   );
 }
 
-// ── Peldošie UI elementi virs teksta ─────────────────────────────────────────
-function FloatingElements() {
-  return (
-    <div className="absolute inset-0 pointer-events-none select-none overflow-hidden">
-
-      {/* Augšā kreisajā — progress badge */}
-      <motion.div
-        animate={{ y: [0, -8, 0] }}
-        transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute"
-        style={{ top: '12%', left: '8%' }}
-      >
-        <div className="flex flex-col items-center gap-1">
-          <div className="bg-purple/80 text-white text-xs font-bold px-2.5 py-1 rounded-full backdrop-blur-sm">
-            73%
-          </div>
-          <div className="w-px h-10 bg-white/20" style={{ borderLeft: '1px dashed rgba(255,255,255,0.3)' }} />
-          <div className="flex items-center gap-1">
-            {[2, 3, 4, 3, 5, 2, 4].map((h, i) => (
-              <div key={i} className="w-2 rounded-sm"
-                style={{ height: h * 6, background: i < 3 ? 'rgba(124,111,255,0.6)' : 'rgba(255,255,255,0.2)' }} />
-            ))}
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Augšā labajā — oranžās bumbiņas */}
-      <motion.div
-        animate={{ x: [0, 6, 0], y: [0, -4, 0] }}
-        transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute"
-        style={{ top: '8%', right: '15%' }}
-      >
-        <div className="relative w-20 h-16">
-          <div className="absolute w-5 h-5 rounded-full bg-orange-400/70" style={{ top: 0, right: 20 }} />
-          <div className="absolute w-4 h-4 rounded-full bg-orange-300/50" style={{ top: 8, right: 4 }} />
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="absolute w-1.5 h-1.5 rounded-full bg-orange-400/40"
-              style={{ top: Math.random() * 30 + 20, right: i * 6 + 2 }} />
-          ))}
-        </div>
-      </motion.div>
-
-      {/* Vidū — koda/jautājumu chips */}
-      <motion.div
-        animate={{ y: [0, -6, 0], rotate: [-1, 1, -1] }}
-        transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
-        className="absolute"
-        style={{ top: '38%', left: '28%' }}
-      >
-        <div className="space-y-1.5">
-          {[
-            { text: 'ISO 9001', active: false },
-            { text: 'PDCA', active: true },
-            { text: 'Kaizen', active: false },
-          ].map((chip) => (
-            <div key={chip.text}
-              className={`px-3 py-1 rounded-lg text-xs font-medium border flex items-center gap-1.5 ${chip.active
-                ? 'bg-gold/90 border-gold text-black'
-                : 'bg-white/10 border-white/20 text-white/60 backdrop-blur-sm'}`}>
-              {chip.active && <span className="w-1.5 h-1.5 rounded-full bg-black/40" />}
-              {chip.text}
-            </div>
-          ))}
-        </div>
-      </motion.div>
-
-      {/* Labajā apakšā — zilā bumbiņa */}
-      <motion.div
-        animate={{ x: [0, -5, 0], y: [0, 5, 0] }}
-        transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-        className="absolute w-5 h-5 rounded-full"
-        style={{ bottom: '28%', right: '10%', background: '#7c6fff' }}
-      />
-
-      {/* Horizontālas līnijas — fona efekts */}
-      {[20, 50, 78].map((top) => (
-        <div key={top} className="absolute inset-x-0 h-px bg-white/4"
-          style={{ top: `${top}%` }} />
-      ))}
-    </div>
-  );
-}
 
 // ── Feature sekcijas ──────────────────────────────────────────────────────────
 function FeatureRow({
@@ -266,9 +190,6 @@ export function HomeScreen() {
         {/* Fona gaismas */}
         <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[600px] rounded-full blur-[160px] pointer-events-none opacity-15"
           style={{ background: 'radial-gradient(circle, #7c6fff 0%, #4ecdc4 50%, transparent 70%)' }} />
-
-        {/* Peldošie elementi */}
-        <FloatingElements />
 
         {/* Milzīgais virsraksts */}
         <motion.div
