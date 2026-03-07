@@ -226,7 +226,7 @@ export function HomeScreen() {
           <motion.button
             whileHover={{ scale: 1.03, y: -2 }}
             whileTap={{ scale: 0.97 }}
-            onClick={() => user ? navigate('/select') : setAuthOpen(true)}
+            onClick={() => user ? navigate('/dashboard') : setAuthOpen(true)}
             className="px-10 py-4 rounded-full text-white font-bold text-base cursor-pointer"
             style={{
               background: 'linear-gradient(135deg, #22c55e, #16a34a)',
