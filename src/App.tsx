@@ -8,6 +8,7 @@ import { GameScreen } from './screens/GameScreen';
 import { ResultScreen } from './screens/ResultScreen';
 import { ProfileScreen } from './screens/ProfileScreen';
 import { DashboardScreen } from './screens/DashboardScreen';
+import { CoursesScreen } from './screens/CoursesScreen';
 
 export function App() {
   const location = useLocation();
@@ -23,6 +24,7 @@ export function App() {
         <Route path="/system/:systemId/level/:levelNumber/result" element={<ResultScreen />} />
         <Route path="/profile" element={<ProfileScreen />} />
         <Route path="/home" element={<DashboardScreen />} />
+        <Route path="/courses" element={<CoursesScreen />} />
       </Routes>
     </AnimatePresence>
   );

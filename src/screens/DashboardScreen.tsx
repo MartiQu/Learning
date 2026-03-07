@@ -98,12 +98,12 @@ function HomeNav({ activeTab, onTabChange }: { activeTab: string; onTabChange: (
       </button>
 
       {[
-        { id: 'home', label: 'Sākums' },
-        { id: 'courses', label: 'Kursi' },
+        { id: 'home', label: 'Sākums', path: '/home' },
+        { id: 'courses', label: 'Kursi', path: '/courses' },
       ].map((tab) => (
         <button
           key={tab.id}
-          onClick={() => onTabChange(tab.id)}
+          onClick={() => { onTabChange(tab.id); navigate(tab.path); }}
           className={`text-sm font-medium pb-0.5 transition-all cursor-pointer border-b-2 ${
             activeTab === tab.id
               ? 'text-white border-white'
