@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/martinskukars/Desktop/**)",
+      "Bash(npm create vite@latest QualitySystems -- --template react-ts)",
+      "Bash(echo $PATH)",
+      "Bash(export:*)",
+      "Bash(/Users/martinskukars/.nvm/versions/node/v24.11.1/bin/npm create:*)",
+      "Bash(env:*)",
+      "Bash(/usr/bin/curl:*)",
+      "WebFetch(domain:brilliant.org)",
+      "Bash(pkill:*)",
+      "Bash(git config:*)",
+      "Bash(git:*)"
+    ]
+  }
+}
