@@ -205,9 +205,9 @@ export function HomeScreen() {
         >
           <h1 className="font-heading leading-[0.9] font-extrabold text-white select-none"
             style={{ fontSize: 'clamp(42px, 10vw, 140px)' }}>
-            Mācoties<br />
+            MĀCIES<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold via-yellow-300 to-purple">
-              darot.
+              DAROT
             </span>
           </h1>
         </motion.div>
