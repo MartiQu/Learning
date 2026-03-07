@@ -66,16 +66,23 @@ export function ResultScreen() {
       (p) => p.completedLevels
     ).length;
 
-    // Check if the current system is fully completed (all 10 levels)
-    const sysProgress = updatedProgress.progress[systemId!];
-    const systemCompleted = passed && (sysProgress?.completedLevels.length ?? 0) >= 10;
+    const threeStarLevelsCount = Object.values(updatedProgress.progress)
+      .flatMap((p) => Object.values(p.levelStars))
+      .filter((s) => s === 3).length;
+    const systemsFullyCompleted = Object.values(updatedProgress.progress)
+      .filter((p) => p.completedLevels.length >= 10).length;
+    const allSystemsStarted = qualitySystems.every(
+      (s) => (updatedProgress.progress[s.id]?.completedLevels.length ?? 0) > 0
+    );
 
     const newBadges = checkAndAward({
       totalCompletedLevels: totalCompleted,
       perfectScore: pct === 100,
       streakDays: newStreak,
       totalXP,
-      systemCompleted,
+      systemsFullyCompleted,
+      threeStarLevelsCount,
+      allSystemsStarted,
     });
 
     // Queue modals: streak first, then badges

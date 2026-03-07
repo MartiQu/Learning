@@ -1,8 +1,10 @@
-import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { useProgressStore } from '../store/progressStore';
-import { useBadgeStore } from '../store/badgeStore';
+import { useBadgeStore, BADGE_DEFS } from '../store/badgeStore';
+import type { BadgeProgressData } from '../store/badgeStore';
 import { qualitySystems } from '../data/systems';
 import { AppNavbar } from '../components/ui/AppNavbar';
 import { ProgressBar } from '../components/ui/ProgressBar';
@@ -13,12 +15,133 @@ function userLevel(xp: number) {
   return Math.floor(xp / 150) + 1;
 }
 
+// ── Badge gallery ─────────────────────────────────────────────────────────────
+
+function BadgeGallery() {
+  const { earnedBadgeIds, perfectScoreCount } = useBadgeStore();
+  const { getProgress, streakDays } = useProgressStore();
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
+
+  const allProgress = qualitySystems.map((s) => getProgress(s.id));
+  const totalXP = allProgress.reduce((a, p) => a + p.totalXP, 0);
+  const totalCompletedLevels = allProgress.reduce((a, p) => a + p.completedLevels.length, 0);
+  const threeStarLevelsCount = allProgress
+    .flatMap((p) => Object.values(p.levelStars))
+    .filter((s) => s === 3).length;
+  const systemsFullyCompleted = allProgress.filter((p) => p.completedLevels.length >= TOTAL_LEVELS).length;
+  const systemsStarted = allProgress.filter((p) => p.completedLevels.length > 0).length;
+
+  const progressData: BadgeProgressData = {
+    totalXP,
+    totalCompletedLevels,
+    streakDays,
+    perfectScoreCount,
+    threeStarLevelsCount,
+    systemsFullyCompleted,
+    systemsStarted,
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-white/50 text-xs font-semibold uppercase tracking-wider">Nozīmītes</span>
+        <span className="text-white/30 text-xs">{earnedBadgeIds.length} / {BADGE_DEFS.length}</span>
+      </div>
+
+      <div className="grid grid-cols-4 gap-2">
+        {BADGE_DEFS.map((badge) => {
+          const earned = earnedBadgeIds.includes(badge.id);
+          const progress = badge.getProgress?.(progressData);
+          const progressPct = progress ? Math.round((progress.current / progress.total) * 100) : 0;
+
+          return (
+            <div
+              key={badge.id}
+              className="relative flex justify-center"
+              onMouseEnter={() => setHoveredId(badge.id)}
+              onMouseLeave={() => setHoveredId(null)}
+            >
+              {/* Badge circle */}
+              <div
+                className="w-11 h-11 rounded-full flex items-center justify-center text-base cursor-default"
+                style={earned ? {
+                  background: badge.color + '33',
+                  border: `2px solid ${badge.color}88`,
+                  boxShadow: `0 0 10px ${badge.color}44`,
+                } : {
+                  background: 'rgba(255,255,255,0.06)',
+                  border: '2px solid rgba(255,255,255,0.08)',
+                }}
+              >
+                <span style={earned ? {} : { opacity: 0.25, filter: 'grayscale(1)' }}>
+                  {badge.secret && !earned ? '?' : badge.icon}
+                </span>
+              </div>
+
+              {/* Tooltip */}
+              <AnimatePresence>
+                {hoveredId === badge.id && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 4 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute z-50 pointer-events-none"
+                    style={{
+                      bottom: 'calc(100% + 8px)',
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      width: 180,
+                      background: '#1e1e2e',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      borderRadius: 10,
+                      padding: '10px 12px',
+                    }}
+                  >
+                    {badge.secret && !earned ? (
+                      <>
+                        <div className="text-white font-semibold text-xs mb-1">???</div>
+                        <div className="text-white/40 text-xs">Noslēpumains izaicinājums</div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <span className="text-base">{badge.icon}</span>
+                          <span className="text-white font-semibold text-xs leading-tight">{badge.label}</span>
+                        </div>
+                        <div className="text-white/40 text-xs mb-2">{badge.description}</div>
+                        {!earned && progress && (
+                          <div>
+                            <div className="flex justify-between text-xs text-white/30 mb-1">
+                              <span>{progress.current} / {progress.total} {progress.unit}</span>
+                              <span>{progressPct}%</span>
+                            </div>
+                            <div className="h-1 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.1)' }}>
+                              <div
+                                className="h-full rounded-full"
+                                style={{ width: `${progressPct}%`, background: badge.color }}
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ── Left sidebar: profile + streak ───────────────────────────────────────────
 
 function ProfileSidebar() {
   const { user } = useAuthStore();
   const { getProgress, streakDays, reset } = useProgressStore();
-  const { earnedBadgeIds } = useBadgeStore();
 
   const allProgress = qualitySystems.map((s) => getProgress(s.id));
   const totalXP = allProgress.reduce((a, p) => a + p.totalXP, 0);
@@ -62,20 +185,11 @@ function ProfileSidebar() {
         </div>
 
         {/* Secondary metrics */}
-        <div className="flex items-center gap-3 text-xs text-white/30">
-          {earnedBadgeIds.length > 0 && (
-            <span>{earnedBadgeIds.length} nozīmītes</span>
-          )}
-          {bonusPoints > 0 && (
-            <>
-              {earnedBadgeIds.length > 0 && <span className="text-white/12">·</span>}
-              <span>+{bonusPoints} ekz. pts</span>
-            </>
-          )}
-          {earnedBadgeIds.length === 0 && bonusPoints === 0 && (
-            <span>Sāc mācīties, lai nopelnītu nozīmītes</span>
-          )}
-        </div>
+        {bonusPoints > 0 && (
+          <div className="text-xs text-white/30">
+            <span>+{bonusPoints} ekz. pts</span>
+          </div>
+        )}
       </div>
 
       {/* Divider */}
@@ -115,6 +229,12 @@ function ProfileSidebar() {
           );
         })}
       </div>
+
+      {/* Divider */}
+      <div className="h-px bg-white/6" />
+
+      {/* Badge gallery */}
+      <BadgeGallery />
 
       {/* Reset */}
       <button
