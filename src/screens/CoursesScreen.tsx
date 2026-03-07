@@ -13,6 +13,7 @@ const DIFFICULTY: Record<string, { label: string; color: string }> = {
   tqm:       { label: 'Vidējs',       color: '#e8c547' },
   sixsigma:  { label: 'Vidējs',       color: '#e8c547' },
   lean:      { label: 'Iesācējs',     color: '#4ecdc4' },
+  '7s':      { label: 'Iesācējs',     color: '#4ecdc4' },
 };
 
 
