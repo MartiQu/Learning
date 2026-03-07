@@ -7,6 +7,7 @@ import { useProgressStore } from '../store/progressStore';
 import { useGameStore } from '../store/gameStore';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
+import { AppNavbar } from '../components/ui/AppNavbar';
 
 const difficultyLabel = (n: number) => {
   if (n <= 3) return { label: 'Iesācējs', color: '#4ecdc4' };
@@ -42,7 +43,9 @@ export function LevelIntroScreen() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-10">
+    <div className="min-h-screen" style={{ background: '#0a0a0f' }}>
+      <AppNavbar />
+      <div className="flex items-center justify-center px-4 py-10">
       <motion.div
         initial={{ opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -96,6 +99,7 @@ export function LevelIntroScreen() {
           </Button>
         </div>
       </motion.div>
+      </div>
     </div>
   );
 }

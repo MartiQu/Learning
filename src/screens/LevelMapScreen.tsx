@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, useParams } from 'react-router-dom';
+import { AppNavbar } from '../components/ui/AppNavbar';
 import { levels } from '../data/levels';
 import { questions } from '../data/questions';
 import { qualitySystems } from '../data/systems';
@@ -467,27 +468,14 @@ export function LevelMapScreen() {
 
   return (
     <div className="min-h-screen" style={{ background: '#0a0a0f' }}>
-      {/* Sticky nav */}
-      <div
-        className="sticky top-0 z-40 flex items-center gap-2 px-6 py-4 border-b border-white/8"
-        style={{ background: 'rgba(10,10,15,0.96)', backdropFilter: 'blur(12px)' }}
-      >
-        <button
-          onClick={() => navigate('/courses')}
-          className="text-white/40 hover:text-white/80 text-sm transition-colors flex items-center gap-1.5"
-        >
-          ← Kursi
-        </button>
-        <span className="text-white/15">/</span>
-        <span className="text-white/55 text-sm font-medium truncate">{system.name}</span>
-      </div>
+      <AppNavbar />
 
       <div className="max-w-4xl mx-auto px-4 py-8 pb-52">
         <div className="grid md:grid-cols-[256px_1fr] gap-8 items-start">
 
           {/* Left: course info card (sticky) */}
           <motion.div
-            className="md:sticky md:top-24"
+            className="md:sticky md:top-20"
             initial={{ opacity: 0, x: -16 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.4 }}
