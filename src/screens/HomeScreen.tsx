@@ -218,8 +218,8 @@ export function HomeScreen() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.6 }}
           className="relative z-10 text-white/55 text-lg sm:text-xl leading-relaxed max-w-lg mb-10">
-          Interaktīva problēmu risināšana, kas ir efektīva un aizraujoša.<br />
-          Apgūsti ISO 9001, TKV, Six Sigma un vairāk.
+          MBA zināšanas, ko tiešām izmanto praksē.<br />
+          Stratēģija, vadība, kvalitāte — apgūsti soli pa solim.
         </motion.p>
 
         {/* CTA */}
