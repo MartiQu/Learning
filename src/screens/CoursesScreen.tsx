@@ -194,9 +194,12 @@ export function CoursesScreen() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
-              { icon: '📈', name: 'Stratēģiskā vadība', desc: 'Porter, SWOT, konkurences analīze' },
-              { icon: '💰', name: 'Finanšu grāmatvedība', desc: 'P&L, bilances, naudas plūsma' },
-              { icon: '🤝', name: 'Organizāciju uzvedība', desc: 'Motivācija, līderība, komandas' },
+              { icon: '♻️', name: 'Ilgtspējīga attīstība un aprites ekonomika', desc: 'ESG principi, aprites modeļi, zaļā ekonomika' },
+              { icon: '🏛️', name: 'Korporatīvā pārvaldība', desc: 'Valdes struktūras, atbilstība, risku uzraudzība' },
+              { icon: '🎯', name: 'Koučings un līderība', desc: 'Vadītāja loma, motivācija, komandas attīstība' },
+              { icon: '🏢', name: 'Organizāciju vadīšana', desc: 'Struktūras, kultūra, pārmaiņu vadība' },
+              { icon: '📋', name: 'Projektu vadīšana', desc: 'Plānošana, riska vadība, Agile un PRINCE2' },
+              { icon: '🌍', name: 'Sociālā uzņēmējdarbība', desc: 'Sociālā ietekme, hibrīdmodeļi, B Corp' },
             ].map((item, i) => (
               <div
                 key={i}
@@ -205,11 +208,11 @@ export function CoursesScreen() {
                 <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-xl shrink-0">
                   {item.icon}
                 </div>
-                <div>
-                  <div className="text-white/60 font-semibold text-sm">{item.name}</div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-white/60 font-semibold text-sm leading-snug">{item.name}</div>
                   <div className="text-white/25 text-xs mt-0.5">{item.desc}</div>
                 </div>
-                <span className="ml-auto text-xs text-white/20 shrink-0 border border-white/10 px-2 py-0.5 rounded-full">
+                <span className="ml-3 text-xs text-white/20 shrink-0 border border-white/10 px-2 py-0.5 rounded-full">
                   Drīz
                 </span>
               </div>
