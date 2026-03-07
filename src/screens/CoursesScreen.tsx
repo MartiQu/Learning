@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { useProgressStore } from '../store/progressStore';
 import { qualitySystems } from '../data/systems';
-import { logOut } from '../lib/firebase';
-import { Logo } from '../components/ui/Logo';
+import { AppNavbar } from '../components/ui/AppNavbar';
 import { ProgressBar } from '../components/ui/ProgressBar';
 
 const TOTAL_LEVELS = 10;
@@ -16,63 +15,6 @@ const DIFFICULTY: Record<string, { label: string; color: string }> = {
   lean:      { label: 'Iesācējs',     color: '#4ecdc4' },
 };
 
-// ── Navbar (kopīgs ar home) ────────────────────────────────────────────────
-function CoursesNav() {
-  const navigate = useNavigate();
-  const { user } = useAuthStore();
-  const { getProgress } = useProgressStore();
-
-  const totalXP = qualitySystems.reduce((sum, s) => sum + getProgress(s.id).totalXP, 0);
-  const totalCompleted = qualitySystems.reduce((sum, s) => sum + getProgress(s.id).completedLevels.length, 0);
-
-  return (
-    <nav
-      className="sticky top-0 z-40 flex items-center gap-4 px-8 py-4 border-b border-white/8"
-      style={{ background: 'rgba(10,10,15,0.96)', backdropFilter: 'blur(12px)' }}
-    >
-      <button onClick={() => navigate('/home')} className="text-white hover:opacity-70 transition-opacity cursor-pointer mr-2">
-        <Logo height={20} color="currentColor" />
-      </button>
-
-      {[
-        { label: 'Sākums', path: '/home' },
-        { label: 'Kursi',  path: '/courses' },
-      ].map((tab) => (
-        <button
-          key={tab.path}
-          onClick={() => navigate(tab.path)}
-          className={`text-sm font-medium pb-0.5 transition-all cursor-pointer border-b-2 ${
-            tab.path === '/courses'
-              ? 'text-white border-white'
-              : 'text-white/40 border-transparent hover:text-white/70'
-          }`}
-        >
-          {tab.label}
-        </button>
-      ))}
-
-      <div className="ml-auto flex items-center gap-3">
-        <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/10 text-sm">
-          <span className="text-amber-400 font-bold">{totalCompleted}</span>
-          <span className="text-white/40">⚡</span>
-        </div>
-        <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/10 text-sm">
-          <span className="text-gold font-bold">{totalXP.toLocaleString()}</span>
-          <span className="text-white/40">XP</span>
-        </div>
-        {user && (
-          <img src={user.photoURL ?? undefined} alt="" className="w-8 h-8 rounded-full border-2 border-white/20" />
-        )}
-        <button
-          onClick={() => { logOut(); navigate('/'); }}
-          className="text-white/30 hover:text-white/60 text-xs cursor-pointer px-3 py-1.5 rounded-full border border-white/10 hover:border-white/25 transition-all"
-        >
-          Iziet
-        </button>
-      </div>
-    </nav>
-  );
-}
 
 // ── Kursa karte ────────────────────────────────────────────────────────────
 function CourseCard({ system, index }: { system: typeof qualitySystems[number]; index: number }) {
@@ -187,7 +129,7 @@ export function CoursesScreen() {
 
   return (
     <div className="min-h-screen" style={{ background: '#0a0a0f' }}>
-      <CoursesNav />
+      <AppNavbar />
 
       <div className="max-w-5xl mx-auto px-4 py-10">
         {/* Lapas virsraksts */}

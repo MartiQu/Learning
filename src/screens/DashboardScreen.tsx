@@ -1,121 +1,16 @@
-import { useRef, useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { useProgressStore } from '../store/progressStore';
 import { useBadgeStore } from '../store/badgeStore';
 import { qualitySystems } from '../data/systems';
-import { logOut } from '../lib/firebase';
-import { Logo } from '../components/ui/Logo';
+import { AppNavbar } from '../components/ui/AppNavbar';
 import { ProgressBar } from '../components/ui/ProgressBar';
 
 const TOTAL_LEVELS = 10;
 
 function userLevel(xp: number) {
   return Math.floor(xp / 150) + 1;
-}
-
-// ── Hamburger ─────────────────────────────────────────────────────────────────
-
-function HamburgerMenu() {
-  const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function handler(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    }
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, []);
-
-  return (
-    <div ref={ref} className="relative">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="w-8 h-8 flex flex-col items-center justify-center gap-1 rounded-full border border-white/12 hover:border-white/25 hover:bg-white/5 transition-all cursor-pointer"
-      >
-        <span className="block w-3.5 h-px bg-white/60 rounded-full" />
-        <span className="block w-3.5 h-px bg-white/60 rounded-full" />
-        <span className="block w-3.5 h-px bg-white/60 rounded-full" />
-      </button>
-
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: -4 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: -4 }}
-            transition={{ duration: 0.12 }}
-            className="absolute right-0 top-10 w-52 rounded-2xl border border-white/10 shadow-2xl overflow-hidden z-50"
-            style={{ background: '#16161e' }}
-          >
-            {[
-              { label: 'Iestatījumi', icon: '⚙️' },
-              { label: 'Par mums', icon: 'ℹ️' },
-              { label: 'Palīdzība', icon: '❓' },
-            ].map((item) => (
-              <button
-                key={item.label}
-                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white/65 hover:bg-white/6 hover:text-white transition-all cursor-pointer text-left"
-              >
-                <span>{item.icon}</span>
-                {item.label}
-              </button>
-            ))}
-            <div className="border-t border-white/8 mx-3" />
-            <button
-              onClick={() => { logOut(); navigate('/'); setOpen(false); }}
-              className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 transition-all cursor-pointer text-left"
-            >
-              <span>🚪</span> Iziet
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
-
-// ── Navbar ────────────────────────────────────────────────────────────────────
-
-function Navbar({ activeTab, onTabChange }: { activeTab: string; onTabChange: (t: string) => void }) {
-  const navigate = useNavigate();
-  const { user } = useAuthStore();
-
-  return (
-    <nav
-      className="sticky top-0 z-40 flex items-center gap-5 px-8 py-4 border-b border-white/6"
-      style={{ background: 'rgba(10,10,15,0.97)', backdropFilter: 'blur(12px)' }}
-    >
-      <button onClick={() => navigate('/home')} className="text-white hover:opacity-70 transition-opacity cursor-pointer mr-1">
-        <Logo height={19} color="currentColor" />
-      </button>
-
-      {[
-        { id: 'home', label: 'Sākums', path: '/home' },
-        { id: 'courses', label: 'Kursi', path: '/courses' },
-      ].map((tab) => (
-        <button
-          key={tab.id}
-          onClick={() => { onTabChange(tab.id); navigate(tab.path); }}
-          className={`text-sm font-medium transition-all cursor-pointer pb-0.5 border-b-2 ${
-            activeTab === tab.id ? 'text-white border-white' : 'text-white/35 border-transparent hover:text-white/60'
-          }`}
-        >
-          {tab.label}
-        </button>
-      ))}
-
-      <div className="ml-auto flex items-center gap-3">
-        {user?.photoURL && (
-          <img src={user.photoURL} alt="" className="w-8 h-8 rounded-full border-2 border-white/15" />
-        )}
-        <HamburgerMenu />
-      </div>
-    </nav>
-  );
 }
 
 // ── Left sidebar: profile + streak ───────────────────────────────────────────
@@ -433,7 +328,6 @@ function CourseNav() {
 export function DashboardScreen() {
   const navigate = useNavigate();
   const { user, loading } = useAuthStore();
-  const [activeTab, setActiveTab] = useState('home');
 
   if (!loading && !user) {
     navigate('/');
@@ -450,7 +344,7 @@ export function DashboardScreen() {
 
   return (
     <div className="min-h-screen" style={{ background: '#0a0a0f' }}>
-      <Navbar activeTab={activeTab} onTabChange={setActiveTab} />
+      <AppNavbar />
 
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="grid lg:grid-cols-[220px_1fr] gap-10 items-start">
