@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { useProgressStore } from '../store/progressStore';
@@ -11,6 +11,73 @@ import { ProgressRing } from '../components/ui/ProgressRing';
 
 const TOTAL_LEVELS = 10;
 const DAYS = ['S', 'Sv', 'P', 'O', 'T', 'C', 'Pk'];
+
+// ── Hamburger dropdown ─────────────────────────────────────────────────────
+function HamburgerMenu() {
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  const items = [
+    { label: 'Iestatījumi', icon: '⚙️', action: () => {} },
+    { label: 'Par mums', icon: 'ℹ️', action: () => {} },
+    { label: 'Palīdzība', icon: '❓', action: () => {} },
+    { label: 'Produkta atjauninājumi', icon: '🔔', action: () => {} },
+  ];
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="w-9 h-9 flex flex-col items-center justify-center gap-1.5 rounded-full border border-white/15 hover:border-white/30 hover:bg-white/5 transition-all cursor-pointer"
+      >
+        <span className="block w-4 h-0.5 bg-white/70 rounded-full" />
+        <span className="block w-4 h-0.5 bg-white/70 rounded-full" />
+        <span className="block w-4 h-0.5 bg-white/70 rounded-full" />
+      </button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: -6 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: -6 }}
+            transition={{ duration: 0.15 }}
+            className="absolute right-0 top-11 w-56 rounded-2xl border border-white/10 shadow-2xl overflow-hidden z-50"
+            style={{ background: '#16161e' }}
+          >
+            {items.map((item) => (
+              <button
+                key={item.label}
+                onClick={() => { item.action(); setOpen(false); }}
+                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white/70 hover:bg-white/6 hover:text-white transition-all cursor-pointer text-left"
+              >
+                <span className="text-base">{item.icon}</span>
+                {item.label}
+              </button>
+            ))}
+            <div className="border-t border-white/8 mx-3" />
+            <button
+              onClick={() => { logOut(); navigate('/'); setOpen(false); }}
+              className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all cursor-pointer text-left"
+            >
+              <span className="text-base">🚪</span>
+              Iziet
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 
 // ── Navbar ─────────────────────────────────────────────────────────────────
 function HomeNav({ activeTab, onTabChange }: { activeTab: string; onTabChange: (t: string) => void }) {
@@ -57,16 +124,9 @@ function HomeNav({ activeTab, onTabChange }: { activeTab: string; onTabChange: (
           <span className="text-white/40">XP</span>
         </div>
         {user && (
-          <div className="flex items-center gap-2">
-            <img src={user.photoURL ?? undefined} alt="" className="w-8 h-8 rounded-full border-2 border-white/20" />
-            <button
-              onClick={() => { logOut(); navigate('/'); }}
-              className="text-white/30 hover:text-white/60 text-xs transition-colors cursor-pointer px-3 py-1.5 rounded-full border border-white/10 hover:border-white/25"
-            >
-              Iziet
-            </button>
-          </div>
+          <img src={user.photoURL ?? undefined} alt="" className="w-8 h-8 rounded-full border-2 border-white/20" />
         )}
+        <HamburgerMenu />
       </div>
     </nav>
   );
