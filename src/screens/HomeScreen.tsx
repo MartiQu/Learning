@@ -176,7 +176,13 @@ function VisualStreak() {
 export function HomeScreen() {
   const navigate = useNavigate();
   const [authOpen, setAuthOpen] = useState(false);
-  const { user } = useAuthStore();
+  const { user, loading } = useAuthStore();
+
+  // Ja lietotājs jau ielogojies → uzreiz uz home
+  if (!loading && user) {
+    navigate('/home');
+    return null;
+  }
 
   return (
     <div className="min-h-screen overflow-x-hidden" style={{ background: '#0a0a0f' }}>

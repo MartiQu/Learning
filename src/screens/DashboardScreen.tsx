@@ -6,12 +6,14 @@ import { useProgressStore } from '../store/progressStore';
 import { qualitySystems } from '../data/systems';
 import { logOut } from '../lib/firebase';
 import { Logo } from '../components/ui/Logo';
+import { ProgressBar } from '../components/ui/ProgressBar';
+import { ProgressRing } from '../components/ui/ProgressRing';
 
 const TOTAL_LEVELS = 10;
 const DAYS = ['S', 'Sv', 'P', 'O', 'T', 'C', 'Pk'];
 
-// ── Navbar ────────────────────────────────────────────────────────────────────
-function DashboardNav({ activeTab, onTabChange }: { activeTab: string; onTabChange: (t: string) => void }) {
+// ── Navbar ─────────────────────────────────────────────────────────────────
+function HomeNav({ activeTab, onTabChange }: { activeTab: string; onTabChange: (t: string) => void }) {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const { getProgress } = useProgressStore();
@@ -20,59 +22,46 @@ function DashboardNav({ activeTab, onTabChange }: { activeTab: string; onTabChan
   const totalCompleted = qualitySystems.reduce((sum, s) => sum + getProgress(s.id).completedLevels.length, 0);
 
   return (
-    <nav className="sticky top-0 z-40 flex items-center gap-2 px-6 py-3 border-b border-gray-200 bg-white">
-      {/* Logo */}
-      <button onClick={() => navigate('/')} className="cursor-pointer hover:opacity-70 transition-opacity mr-4">
-        <Logo height={20} color="#111111" />
+    <nav
+      className="sticky top-0 z-40 flex items-center gap-4 px-8 py-4 border-b border-white/8"
+      style={{ background: 'rgba(10,10,15,0.96)', backdropFilter: 'blur(12px)' }}
+    >
+      <button onClick={() => navigate('/home')} className="text-white hover:opacity-70 transition-opacity cursor-pointer mr-2">
+        <Logo height={20} color="currentColor" />
       </button>
 
-      {/* Nav tabs */}
       {[
-        { id: 'home', label: 'Sākums', icon: '⌂' },
-        { id: 'courses', label: 'Kursi', icon: '☰' },
+        { id: 'home', label: 'Sākums' },
+        { id: 'courses', label: 'Kursi' },
       ].map((tab) => (
         <button
           key={tab.id}
           onClick={() => onTabChange(tab.id)}
-          className={`flex items-center gap-1.5 px-2 py-3 text-sm font-medium transition-all cursor-pointer border-b-2 -mb-px ${
+          className={`text-sm font-medium pb-0.5 transition-all cursor-pointer border-b-2 ${
             activeTab === tab.id
-              ? 'text-gray-900 border-gray-900'
-              : 'text-gray-500 border-transparent hover:text-gray-700'
+              ? 'text-white border-white'
+              : 'text-white/40 border-transparent hover:text-white/70'
           }`}
         >
-          <span className="text-base">{tab.icon}</span>
           {tab.label}
         </button>
       ))}
 
-      {/* Right side */}
-      <div className="ml-auto flex items-center gap-2">
-        {/* Streak */}
-        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200 text-sm font-medium text-gray-700">
-          <span>{totalCompleted}</span>
-          <span className="text-amber-500">⚡</span>
+      <div className="ml-auto flex items-center gap-3">
+        <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/10 text-sm">
+          <span className="text-amber-400 font-bold">{totalCompleted}</span>
+          <span className="text-white/40">⚡</span>
         </div>
-        {/* XP */}
-        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200 text-sm font-medium text-gray-700">
-          <span>{totalXP.toLocaleString()}</span>
-          <span className="text-yellow-500">★</span>
+        <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/10 text-sm">
+          <span className="text-gold font-bold">{totalXP.toLocaleString()}</span>
+          <span className="text-white/40">XP</span>
         </div>
-        {/* Hamburger + avatar */}
         {user && (
-          <div className="flex items-center gap-2 ml-1">
-            <button
-              onClick={() => navigate('/profile')}
-              className="cursor-pointer group"
-            >
-              <img
-                src={user.photoURL ?? undefined}
-                alt=""
-                className="w-8 h-8 rounded-full border-2 border-gray-200 group-hover:border-gray-400 transition-colors"
-              />
-            </button>
+          <div className="flex items-center gap-2">
+            <img src={user.photoURL ?? undefined} alt="" className="w-8 h-8 rounded-full border-2 border-white/20" />
             <button
               onClick={() => { logOut(); navigate('/'); }}
-              className="text-gray-400 hover:text-gray-600 text-xs transition-colors cursor-pointer px-2 py-1 rounded border border-gray-200 hover:border-gray-300"
+              className="text-white/30 hover:text-white/60 text-xs transition-colors cursor-pointer px-3 py-1.5 rounded-full border border-white/10 hover:border-white/25"
             >
               Iziet
             </button>
@@ -83,78 +72,134 @@ function DashboardNav({ activeTab, onTabChange }: { activeTab: string; onTabChan
   );
 }
 
-// ── Streak widget ─────────────────────────────────────────────────────────────
-function StreakWidget() {
-  const { getProgress } = useProgressStore();
-  const totalCompleted = qualitySystems.reduce((sum, s) => sum + getProgress(s.id).completedLevels.length, 0);
-  const today = new Date().getDay(); // 0=Sun
+// ── Lietotāja karte ────────────────────────────────────────────────────────
+function UserCard() {
+  const { user } = useAuthStore();
+  const { getProgress, reset } = useProgressStore();
+
+  const allProgress = qualitySystems.map((s) => getProgress(s.id));
+  const totalXP = allProgress.reduce((a, p) => a + p.totalXP, 0);
+  const totalCompleted = allProgress.reduce((a, p) => a + p.completedLevels.length, 0);
+  const totalPossible = qualitySystems.length * TOTAL_LEVELS;
+  const totalStars = allProgress.reduce((a, p) => a + Object.values(p.levelStars).reduce((b, s) => b + s, 0), 0);
+  const bonusPoints = allProgress.filter((p) => p.completedLevels.length >= TOTAL_LEVELS).length * 10;
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-1.5">
-          <span className="font-extrabold text-4xl text-gray-900 leading-none">{totalCompleted}</span>
-          <span className="text-2xl text-amber-400">⚡</span>
-        </div>
-        <div className="flex gap-1 text-gray-300">
-          <span className="text-lg">□</span>
-          <span className="text-lg">□</span>
+    <div className="bg-surface rounded-2xl border border-white/8 p-5">
+      {/* Avatar + vārds */}
+      <div className="flex items-center gap-3 mb-5">
+        {user?.photoURL && (
+          <img src={user.photoURL} alt="" className="w-12 h-12 rounded-full border-2 border-white/15" />
+        )}
+        <div>
+          <div className="font-bold text-white text-sm">{user?.displayName}</div>
+          <div className="text-white/30 text-xs truncate max-w-[140px]">{user?.email}</div>
         </div>
       </div>
-      <p className="text-gray-500 text-sm mb-5">
-        {totalCompleted === 0
-          ? <>Atrisini <strong className="text-gray-900">3 uzdevumus</strong>, lai sāktu sēriju</>
-          : <>Esi pabeidzis <strong className="text-gray-900">{totalCompleted}</strong> uzdevumus</>
-        }
-      </p>
-      {/* Dienu rindiņa */}
-      <div className="flex items-center justify-between">
-        {DAYS.map((day, i) => {
-          const isToday = i === today;
-          const isPast = i < today;
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 gap-2 mb-4">
+        {[
+          { label: 'Kopējie XP', value: totalXP.toLocaleString(), color: '#e8c547', icon: '⚡' },
+          { label: 'Līmeņi', value: `${totalCompleted}/${totalPossible}`, color: '#4ecdc4', icon: '✓' },
+          { label: 'Zvaigznes', value: totalStars, color: '#ffd700', icon: '★' },
+          { label: 'Eksāmens', value: `+${bonusPoints}pt`, color: '#7c6fff', icon: '🎓' },
+        ].map((s) => (
+          <div key={s.label} className="bg-white/4 rounded-xl p-3 border border-white/6">
+            <div className="text-lg">{s.icon}</div>
+            <div className="font-bold text-base mt-0.5" style={{ color: s.color }}>{s.value}</div>
+            <div className="text-white/30 text-xs">{s.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Progress katrai sistēmai */}
+      <div className="space-y-3">
+        {qualitySystems.map((sys) => {
+          const p = getProgress(sys.id);
+          const pct = Math.round((p.completedLevels.length / TOTAL_LEVELS) * 100);
           return (
-            <div key={day + i} className="flex flex-col items-center gap-1.5">
-              <div className={`w-9 h-9 rounded-full flex items-center justify-center border-2 transition-all ${
-                isToday
-                  ? 'border-gray-300 bg-white'
-                  : isPast
-                  ? 'border-gray-200 bg-gray-50'
-                  : 'border-gray-100 bg-gray-50'
-              }`}>
-                <span className={`text-sm ${isToday ? 'text-gray-500' : 'text-gray-300'}`}>⚡</span>
+            <div key={sys.id}>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-white/60 text-xs flex items-center gap-1.5">
+                  <span>{sys.icon}</span>{sys.name}
+                </span>
+                <span className="text-white/30 text-xs">{p.completedLevels.length}/{TOTAL_LEVELS}</span>
               </div>
-              <span className={`text-xs font-semibold ${isToday ? 'text-gray-900' : 'text-gray-400'}`}>
-                {day}
-              </span>
+              <ProgressBar value={pct} color={sys.color} height={4} />
             </div>
           );
         })}
+      </div>
+
+      {/* Reset */}
+      <button
+        onClick={() => {
+          if (window.confirm('Atiestatīt VISU progresu?')) reset();
+        }}
+        className="mt-4 w-full text-center text-white/20 hover:text-white/50 text-xs transition-colors cursor-pointer py-1"
+      >
+        Atiestatīt progresu
+      </button>
+    </div>
+  );
+}
+
+// ── Streak widget ──────────────────────────────────────────────────────────
+function StreakWidget() {
+  const { getProgress } = useProgressStore();
+  const totalCompleted = qualitySystems.reduce((sum, s) => sum + getProgress(s.id).completedLevels.length, 0);
+  const today = new Date().getDay();
+
+  return (
+    <div className="bg-surface rounded-2xl border border-white/8 p-5">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-1.5">
+          <span className="font-extrabold text-4xl text-white leading-none">{totalCompleted}</span>
+          <span className="text-2xl text-amber-400">⚡</span>
+        </div>
+      </div>
+      <p className="text-white/40 text-sm mb-4">
+        {totalCompleted === 0
+          ? <>Atrisini <strong className="text-white/70">3 uzdevumus</strong>, lai sāktu sēriju</>
+          : <><strong className="text-white">{totalCompleted}</strong> uzdevumi pabeigti</>
+        }
+      </p>
+      <div className="flex items-center justify-between">
+        {DAYS.map((day, i) => (
+          <div key={day + i} className="flex flex-col items-center gap-1.5">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center border transition-all ${
+              i === today ? 'border-gold/50 bg-gold/15' : 'border-white/10 bg-white/3'
+            }`}>
+              <span className={`text-xs ${i === today ? 'text-gold' : 'text-white/20'}`}>⚡</span>
+            </div>
+            <span className={`text-xs font-medium ${i === today ? 'text-white' : 'text-white/25'}`}>{day}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
 }
 
-// ── Leagues widget ─────────────────────────────────────────────────────────────
-function LeaguesWidget() {
+// ── Sasniegumi ─────────────────────────────────────────────────────────────
+function AchievementsWidget() {
   const { getProgress } = useProgressStore();
   const anyStarted = qualitySystems.some((s) => getProgress(s.id).completedLevels.length > 0);
-  const completedCount = qualitySystems.filter((s) => getProgress(s.id).completedLevels.length >= TOTAL_LEVELS).length;
+  const completed = qualitySystems.filter((s) => getProgress(s.id).completedLevels.length >= TOTAL_LEVELS);
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm flex items-center gap-4">
-      <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center text-gray-400 shrink-0 text-2xl">
-        {completedCount > 0 ? '🏆' : '🛡️'}
+    <div className="bg-surface rounded-2xl border border-white/8 p-4 flex items-center gap-4">
+      <div className="w-11 h-11 rounded-xl bg-white/5 border border-white/8 flex items-center justify-center text-2xl shrink-0">
+        {completed.length > 0 ? '🏆' : '🛡️'}
       </div>
       <div>
-        <div className="text-xs font-bold uppercase tracking-wider text-gray-500">
-          {completedCount > 0 ? 'LĪGAS ATBLOĶĒTAS' : 'ATBLOĶĒT LĪGAS'}
+        <div className="text-xs font-bold uppercase tracking-wider text-white/40">
+          {completed.length > 0 ? 'LĪGAS ATBLOĶĒTAS' : 'ATBLOĶĒT LĪGAS'}
         </div>
-        <div className="text-sm text-gray-400">
-          {completedCount > 0
-            ? `${completedCount} kurss pabeigts`
-            : anyStarted
-            ? 'Pabeidz pirmo kursu'
-            : 'Pabeidz pirmo nodarbību'
+        <div className="text-sm text-white/30">
+          {completed.length > 0
+            ? `${completed.length} kurss pabeigts`
+            : anyStarted ? 'Pabeidz pirmo kursu' : 'Pabeidz pirmo nodarbību'
           }
         </div>
       </div>
@@ -162,12 +207,11 @@ function LeaguesWidget() {
   );
 }
 
-// ── Galvenā kursa karte (labā puse) ───────────────────────────────────────────
-function MainCourseCard({ onSelectSystem }: { onSelectSystem: (id: string) => void }) {
+// ── Galvenā kursa karte ────────────────────────────────────────────────────
+function MainCourseCard() {
   const navigate = useNavigate();
   const { getProgress } = useProgressStore();
 
-  // Aktīvais (pirmais nesākts vai pirmais) kurss
   const activeSys =
     qualitySystems.find((s) => {
       const p = getProgress(s.id);
@@ -178,26 +222,26 @@ function MainCourseCard({ onSelectSystem }: { onSelectSystem: (id: string) => vo
 
   const handleStart = (sysId: string) => {
     const p = getProgress(sysId);
-    const nextLevel = p.completedLevels.length + 1;
-    navigate(`/system/${sysId}/level/${Math.min(nextLevel, TOTAL_LEVELS)}`);
+    const next = Math.min(p.completedLevels.length + 1, TOTAL_LEVELS);
+    navigate(`/system/${sysId}/level/${next}`);
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+    <div className="bg-surface rounded-2xl border border-white/8 overflow-hidden"
+      style={{ borderColor: `${activeSys.color}22` }}>
       {/* Ilustrācijas zona */}
       <div
-        className="flex flex-col items-center justify-center pt-10 pb-6 px-8 text-center relative"
+        className="flex flex-col items-center justify-center pt-10 pb-6 px-8 text-center"
         style={{
-          background: 'linear-gradient(160deg, #f0f4ff 0%, #fafbff 100%)',
-          minHeight: 220,
+          background: `linear-gradient(160deg, ${activeSys.color}12 0%, transparent 60%)`,
+          minHeight: 200,
         }}
       >
-        {/* Liela ikona */}
-        <div className="text-7xl mb-4 select-none" style={{ filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.12))' }}>
+        <div className="text-7xl mb-4 select-none" style={{ filter: 'drop-shadow(0 8px 32px rgba(0,0,0,0.4))' }}>
           🎓
         </div>
-        <h2 className="font-bold text-2xl text-gray-900 mb-1">Kvalitātes sistēmas</h2>
-        <div className="text-xs font-bold uppercase tracking-widest text-blue-600">KURSS 1</div>
+        <h2 className="font-bold text-2xl text-white mb-1">Kvalitātes sistēmas</h2>
+        <div className="text-xs font-bold uppercase tracking-widest" style={{ color: activeSys.color }}>KURSS 1</div>
       </div>
 
       {/* Kursu saraksts */}
@@ -206,69 +250,67 @@ function MainCourseCard({ onSelectSystem }: { onSelectSystem: (id: string) => vo
           const p = getProgress(sys.id);
           const done = p.completedLevels.length >= TOTAL_LEVELS;
           const started = p.completedLevels.length > 0;
+          const pct = Math.round((p.completedLevels.length / TOTAL_LEVELS) * 100);
           const isActive = sys.id === activeSys.id;
 
           return (
             <button
               key={sys.id}
-              onClick={() => onSelectSystem(sys.id)}
+              onClick={() => navigate(`/system/${sys.id}`)}
               className={`w-full flex items-center gap-4 px-3 py-3 rounded-xl transition-all cursor-pointer text-left ${
-                isActive ? 'bg-gray-50' : 'hover:bg-gray-50'
+                isActive ? 'bg-white/6' : 'hover:bg-white/4'
               }`}
             >
-              {/* Ikona */}
-              <div
-                className="w-10 h-10 rounded-full flex items-center justify-center text-lg shrink-0 border-2"
-                style={
-                  done
-                    ? { background: sys.color, borderColor: sys.color, color: '#fff' }
-                    : started
-                    ? { background: `${sys.color}20`, borderColor: sys.color, color: sys.color }
-                    : { background: '#f3f4f6', borderColor: '#e5e7eb', color: '#9ca3af' }
-                }
-              >
-                {sys.icon}
+              <div className="relative shrink-0">
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-lg border-2"
+                  style={
+                    done
+                      ? { background: sys.color, borderColor: sys.color, color: '#000' }
+                      : started
+                      ? { background: `${sys.color}20`, borderColor: `${sys.color}60`, color: sys.color }
+                      : { background: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.3)' }
+                  }
+                >
+                  {sys.icon}
+                </div>
+                {started && !done && (
+                  <div className="absolute -bottom-0.5 -right-0.5">
+                    <ProgressRing value={pct} size={18} strokeWidth={2.5} color={sys.color} />
+                  </div>
+                )}
               </div>
-              {/* Teksts */}
               <div className="flex-1 min-w-0">
-                <div className={`font-semibold text-sm truncate ${done || started ? 'text-gray-900' : 'text-gray-500'}`}>
+                <div className={`font-semibold text-sm truncate ${started || done ? 'text-white' : 'text-white/40'}`}>
                   {sys.name}
                 </div>
-                <div className="text-xs text-gray-400 truncate">
-                  {done
-                    ? 'Pabeigts ✓'
-                    : started
-                    ? `${p.completedLevels.length}/${TOTAL_LEVELS} līmeņi`
-                    : 'Nav sākts'
-                  }
+                <div className="text-white/30 text-xs">
+                  {done ? 'Pabeigts ✓' : started ? `${p.completedLevels.length}/${TOTAL_LEVELS} līmeņi` : 'Nav sākts'}
                 </div>
               </div>
-              {/* Toggle indikators */}
               <div className={`w-5 h-5 rounded-full border-2 shrink-0 flex items-center justify-center ${
-                done
-                  ? 'border-green-400 bg-green-400'
-                  : started
-                  ? 'border-blue-400 bg-blue-100'
-                  : 'border-gray-200 bg-white'
+                done ? 'border-green-500 bg-green-500' : started ? 'border-white/30' : 'border-white/10'
               }`}>
-                {done && <span className="text-white text-xs">✓</span>}
-                {started && !done && (
-                  <div className="w-2 h-2 rounded-full bg-blue-400" />
-                )}
+                {done && <span className="text-white text-xs leading-none">✓</span>}
+                {started && !done && <div className="w-2 h-2 rounded-full" style={{ background: sys.color }} />}
               </div>
             </button>
           );
         })}
       </div>
 
-      {/* Sākt poga */}
+      {/* Sākt/Turpināt poga */}
       <div className="px-5 pb-5">
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => handleStart(activeSys.id)}
           className="w-full py-4 rounded-2xl font-bold text-white text-base cursor-pointer"
-          style={{ background: 'linear-gradient(90deg, #4f6ef7, #3b5bdb)', boxShadow: '0 4px 16px rgba(79,110,247,0.35)' }}
+          style={{
+            background: `linear-gradient(135deg, ${activeSys.color}, ${activeSys.color}99)`,
+            boxShadow: `0 4px 20px ${activeSys.color}35`,
+            color: activeSys.color === '#e8c547' ? '#000' : '#fff',
+          }}
         >
           {getProgress(activeSys.id).completedLevels.length === 0 ? 'Sākt' : 'Turpināt'}
         </motion.button>
@@ -277,8 +319,9 @@ function MainCourseCard({ onSelectSystem }: { onSelectSystem: (id: string) => vo
   );
 }
 
-// ── Kursu thumbnails (apakšā) ─────────────────────────────────────────────────
-function CourseThumbnails({ onSelect }: { onSelect: (id: string) => void }) {
+// ── Kursu thumbnails ───────────────────────────────────────────────────────
+function CourseThumbnails() {
+  const navigate = useNavigate();
   const { getProgress } = useProgressStore();
 
   return (
@@ -290,19 +333,18 @@ function CourseThumbnails({ onSelect }: { onSelect: (id: string) => void }) {
         return (
           <motion.button
             key={sys.id}
-            onClick={() => onSelect(sys.id)}
+            onClick={() => navigate(`/system/${sys.id}`)}
             whileHover={{ y: -2 }}
             whileTap={{ scale: 0.96 }}
-            className="flex-1 p-3 rounded-xl border-2 border-gray-200 bg-white hover:border-gray-300 transition-all cursor-pointer text-center shadow-sm"
+            className="flex-1 p-3 rounded-xl border border-white/8 bg-surface hover:border-white/20 transition-all cursor-pointer text-center"
           >
             <div
               className="w-10 h-10 rounded-xl mx-auto mb-2 flex items-center justify-center text-xl"
-              style={{ background: `${sys.color}20` }}
+              style={{ background: `${sys.color}18` }}
             >
               {sys.icon}
             </div>
-            {/* Mini progress bar */}
-            <div className="h-1 rounded-full bg-gray-100">
+            <div className="h-1 rounded-full bg-white/8">
               <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: sys.color }} />
             </div>
           </motion.button>
@@ -312,7 +354,7 @@ function CourseThumbnails({ onSelect }: { onSelect: (id: string) => void }) {
   );
 }
 
-// ── Galvenais eksports ────────────────────────────────────────────────────────
+// ── Galvenais eksports ─────────────────────────────────────────────────────
 export function DashboardScreen() {
   const navigate = useNavigate();
   const { user, loading } = useAuthStore();
@@ -325,36 +367,36 @@ export function DashboardScreen() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-gray-400 text-sm">Ielādē...</div>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0a0a0f' }}>
+        <div className="text-white/30 text-sm">Ielādē...</div>
       </div>
     );
   }
 
-  const handleSelectSystem = (id: string) => navigate(`/system/${id}`);
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <DashboardNav activeTab={activeTab} onTabChange={setActiveTab} />
+    <div className="min-h-screen" style={{ background: '#0a0a0f' }}>
+      <HomeNav activeTab={activeTab} onTabChange={setActiveTab} />
 
-      <div className="max-w-5xl mx-auto px-4 py-10">
-        {/* 2 kolonnu izkārtojums */}
+      <div className="max-w-5xl mx-auto px-4 py-8">
         <div className="grid lg:grid-cols-[300px_1fr] gap-6 items-start">
 
-          {/* ── Kreisā kolonna ──────────────────────────────────────────── */}
+          {/* Kreisā kolonna */}
           <div className="space-y-4">
             <motion.div initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.05 }}>
+              <UserCard />
+            </motion.div>
+            <motion.div initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.12 }}>
               <StreakWidget />
             </motion.div>
-            <motion.div initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 }}>
-              <LeaguesWidget />
+            <motion.div initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.18 }}>
+              <AchievementsWidget />
             </motion.div>
           </div>
 
-          {/* ── Labā kolonna ────────────────────────────────────────────── */}
+          {/* Labā kolonna */}
           <motion.div initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}>
-            <MainCourseCard onSelectSystem={handleSelectSystem} />
-            <CourseThumbnails onSelect={handleSelectSystem} />
+            <MainCourseCard />
+            <CourseThumbnails />
           </motion.div>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { signInWithGoogle } from '../../lib/firebase';
 
 interface Props {
@@ -7,10 +8,13 @@ interface Props {
 }
 
 export function AuthModal({ open, onClose }: Props) {
+  const navigate = useNavigate();
+
   const handleGoogle = async () => {
     try {
       await signInWithGoogle();
       onClose();
+      navigate('/home');
     } catch {
       // lietotājs aizvēra Google popup — nekas
     }
@@ -20,7 +24,6 @@ export function AuthModal({ open, onClose }: Props) {
     <AnimatePresence>
       {open && (
         <>
-          {/* Tumšais fons */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -29,8 +32,6 @@ export function AuthModal({ open, onClose }: Props) {
             className="fixed inset-0 z-40"
             style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)' }}
           />
-
-          {/* Modāls */}
           <motion.div
             initial={{ opacity: 0, scale: 0.94, y: 16 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -40,7 +41,6 @@ export function AuthModal({ open, onClose }: Props) {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="w-full max-w-sm bg-white rounded-3xl shadow-2xl px-8 py-10 text-center relative">
-              {/* Aizvērt */}
               <button
                 onClick={onClose}
                 className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer text-lg"
@@ -48,7 +48,6 @@ export function AuthModal({ open, onClose }: Props) {
                 ✕
               </button>
 
-              {/* Logo ikona */}
               <div
                 className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6 shadow-lg"
                 style={{ background: 'linear-gradient(135deg, #e8c547, #7c6fff)' }}
@@ -59,11 +58,8 @@ export function AuthModal({ open, onClose }: Props) {
               <h2 className="text-2xl font-bold text-gray-900 mb-2" style={{ fontFamily: 'Syne, sans-serif' }}>
                 Pierakstīties
               </h2>
-              <p className="text-gray-500 text-sm mb-8">
-                Quality Systems Meistars
-              </p>
+              <p className="text-gray-500 text-sm mb-8">Masterly</p>
 
-              {/* Google */}
               <button
                 onClick={handleGoogle}
                 className="w-full flex items-center justify-center gap-3 px-4 py-3.5 rounded-xl border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all text-gray-800 font-medium text-base cursor-pointer mb-3"
@@ -77,7 +73,6 @@ export function AuthModal({ open, onClose }: Props) {
                 Pierakstīties ar Google
               </button>
 
-              {/* E-pasts (drīzumā) */}
               <button
                 disabled
                 className="w-full flex items-center justify-center gap-3 px-4 py-3.5 rounded-xl bg-gray-100 text-gray-400 font-medium text-base cursor-not-allowed mb-6"

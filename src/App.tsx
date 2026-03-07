@@ -22,7 +22,7 @@ export function App() {
         <Route path="/system/:systemId/level/:levelNumber/game" element={<GameScreen />} />
         <Route path="/system/:systemId/level/:levelNumber/result" element={<ResultScreen />} />
         <Route path="/profile" element={<ProfileScreen />} />
-        <Route path="/dashboard" element={<DashboardScreen />} />
+        <Route path="/home" element={<DashboardScreen />} />
       </Routes>
     </AnimatePresence>
   );
