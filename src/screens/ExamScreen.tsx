@@ -22,6 +22,7 @@ export function ExamScreen() {
   const [loading, setLoading] = useState(false);
   const [examDone, setExamDone] = useState(false);
   const [score, setScore] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -44,13 +45,21 @@ export function ExamScreen() {
 
   async function sendMessage(msgs: Message[]) {
     setLoading(true);
+    setError(null);
     try {
       const res = await fetch('/api/exam-chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: msgs, systemId }),
       });
-      const { text } = await res.json();
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        setError(`Kļūda: ${data.error ?? res.statusText}`);
+        return;
+      }
+
+      const { text } = data;
       const newMessages: Message[] = [...msgs, { role: 'assistant', content: text }];
       setMessages(newMessages);
 
@@ -63,7 +72,7 @@ export function ExamScreen() {
         setExamDone(true);
       }
     } catch (err) {
-      console.error('Exam chat error:', err);
+      setError(`Savienojuma kļūda: ${err instanceof Error ? err.message : 'nezināma kļūda'}`);
     } finally {
       setLoading(false);
     }
@@ -201,6 +210,32 @@ export function ExamScreen() {
                       }}
                     />
                   ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Error message */}
+          <AnimatePresence>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="flex justify-center"
+              >
+                <div
+                  className="flex items-center gap-2 px-4 py-3 rounded-2xl text-sm max-w-[85%]"
+                  style={{ background: 'rgba(255,80,80,0.1)', border: '1px solid rgba(255,80,80,0.25)', color: '#ff8080' }}
+                >
+                  <span>⚠️</span>
+                  <span>{error}</span>
+                  <button
+                    onClick={() => { setError(null); sendMessage(messages); }}
+                    className="ml-2 underline underline-offset-2 hover:opacity-70"
+                  >
+                    Mēģināt vēlreiz
+                  </button>
                 </div>
               </motion.div>
             )}

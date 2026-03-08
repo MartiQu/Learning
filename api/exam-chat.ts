@@ -63,16 +63,27 @@ export default async function handler(req: Request): Promise<Response> {
     return new Response('Method Not Allowed', { status: 405 });
   }
 
-  const { messages, systemId } = await req.json();
-  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  try {
+    const { messages, systemId } = await req.json();
+    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-  const message = await client.messages.create({
-    model: 'claude-haiku-4-5-20251001',
-    max_tokens: 512,
-    system: SYSTEM_PROMPTS[systemId] ?? SYSTEM_PROMPTS.iso9001,
-    messages,
-  });
+    // Anthropic requires at least one message — add a kickoff if starting fresh
+    const messagesWithKickoff =
+      messages.length === 0
+        ? [{ role: 'user', content: 'Sāksim eksāmenu.' }]
+        : messages;
 
-  const text = message.content[0].type === 'text' ? message.content[0].text : '';
-  return Response.json({ text });
+    const message = await client.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 512,
+      system: SYSTEM_PROMPTS[systemId] ?? SYSTEM_PROMPTS.iso9001,
+      messages: messagesWithKickoff,
+    });
+
+    const text = message.content[0].type === 'text' ? message.content[0].text : '';
+    return Response.json({ text });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    return Response.json({ error: message }, { status: 500 });
+  }
 }
