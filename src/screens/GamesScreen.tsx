@@ -14,6 +14,15 @@ const GAME_TYPES = [
     icon: '🐍',
     desc: 'Ēd pareizās atbildes pirms beidzas laiks!',
     available: true,
+    systemIds: undefined as string[] | undefined,
+  },
+  {
+    id: 'workplace',
+    name: '7S Glābējs',
+    icon: '🏭',
+    desc: 'Ievies 7S sistēmu haotiskā darba vietā — 7 zonas, reāli scenāriji.',
+    available: true,
+    systemIds: ['7s'] as string[] | undefined,
   },
   {
     id: 'memory',
@@ -21,6 +30,7 @@ const GAME_TYPES = [
     icon: '🃏',
     desc: 'Savieno terminus ar definīcijām',
     available: false,
+    systemIds: undefined as string[] | undefined,
   },
   {
     id: 'quiz-race',
@@ -28,6 +38,7 @@ const GAME_TYPES = [
     icon: '⚡',
     desc: 'Atbildi pirms laiks beidzas',
     available: false,
+    systemIds: undefined as string[] | undefined,
   },
 ];
 
@@ -68,7 +79,7 @@ function SystemGameCard({
 
       {/* Game type list */}
       <div className="p-4 flex flex-col gap-2.5">
-        {GAME_TYPES.map((game) => (
+        {GAME_TYPES.filter((game) => !game.systemIds || game.systemIds.includes(system.id)).map((game) => (
           <div
             key={game.id}
             className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${

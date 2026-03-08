@@ -10,6 +10,7 @@ import { CoursesScreen } from './screens/CoursesScreen';
 import { ExamScreen } from './screens/ExamScreen';
 import { GamesScreen } from './screens/GamesScreen';
 import { SnakeGameScreen } from './screens/SnakeGameScreen';
+import { SevenSGameScreen } from './screens/SevenSGameScreen';
 
 export function App() {
   const location = useLocation();
@@ -27,6 +28,7 @@ export function App() {
         <Route path="/courses" element={<CoursesScreen />} />
         <Route path="/games" element={<GamesScreen />} />
         <Route path="/games/snake/:systemId" element={<SnakeGameScreen />} />
+        <Route path="/games/workplace/:systemId" element={<SevenSGameScreen />} />
       </Routes>
     </AnimatePresence>
   );
