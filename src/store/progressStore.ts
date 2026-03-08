@@ -7,10 +7,12 @@ interface ProgressState {
   streakDays: number;
   lastActivityDate: string; // 'YYYY-MM-DD'
   lastActiveSystemId: string;
+  examScores: Record<string, number>; // systemId → 1–10
   addXP: (systemId: string, xp: number) => void;
   completeLevel: (systemId: string, levelNumber: number, stars: number, xp: number) => void;
   isLevelUnlocked: (systemId: string, levelNumber: number) => boolean;
   getProgress: (systemId: string) => UserProgress;
+  saveExamScore: (systemId: string, score: number) => void;
   reset: () => void;
 }
 
@@ -28,6 +30,7 @@ export const useProgressStore = create<ProgressState>()(
       streakDays: 0,
       lastActivityDate: '',
       lastActiveSystemId: '',
+      examScores: {},
 
       getProgress(systemId) {
         return get().progress[systemId] ?? defaultProgress(systemId);
@@ -86,8 +89,12 @@ export const useProgressStore = create<ProgressState>()(
         });
       },
 
+      saveExamScore(systemId, score) {
+        set((s) => ({ examScores: { ...s.examScores, [systemId]: score } }));
+      },
+
       reset() {
-        set({ progress: {}, streakDays: 0, lastActivityDate: '', lastActiveSystemId: '' });
+        set({ progress: {}, streakDays: 0, lastActivityDate: '', lastActiveSystemId: '', examScores: {} });
       },
     }),
     { name: 'qs-progress' }

@@ -425,7 +425,7 @@ function CourseInfoCard({
 export function LevelMapScreen() {
   const { systemId } = useParams<{ systemId: string }>();
   const navigate = useNavigate();
-  const { getProgress, isLevelUnlocked, streakDays, lastActivityDate } = useProgressStore();
+  const { getProgress, isLevelUnlocked, streakDays, lastActivityDate, examScores } = useProgressStore();
 
   const system = qualitySystems.find((s) => s.id === systemId);
   const systemLevels = levels
@@ -540,6 +540,139 @@ export function LevelMapScreen() {
                   />
                 );
               })}
+
+              {/* Exam separator */}
+              <div className="flex items-center gap-3 mt-3 mb-1">
+                <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.06)' }} />
+                <span className="text-xs uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.2)' }}>
+                  Boss Fight
+                </span>
+                <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.06)' }} />
+              </div>
+
+              {/* Exam node */}
+              {(() => {
+                const allDone =
+                  systemLevels.length > 0 &&
+                  progress.completedLevels.length >= systemLevels.length;
+                const examScore = examScores[systemId!];
+                const examCompleted = examScore !== undefined;
+
+                return (
+                  <motion.div
+                    initial={{ opacity: 0, x: -14 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: systemLevels.length * 0.055 + 0.05 }}
+                    className="flex items-center gap-4"
+                    onClick={allDone ? () => navigate(`/system/${systemId}/exam`) : undefined}
+                    style={{ cursor: allDone ? 'pointer' : 'default', zIndex: 1 }}
+                  >
+                    {/* Node column */}
+                    <div style={{ width: 72, display: 'flex', justifyContent: 'center', flexShrink: 0 }}>
+                      <div style={{ width: 52, height: 52, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                        {examCompleted ? (
+                          <div
+                            style={{
+                              width: 46,
+                              height: 46,
+                              borderRadius: '50%',
+                              background: `linear-gradient(135deg, ${system.color}dd, ${system.color}88)`,
+                              border: `2px solid ${system.color}99`,
+                              boxShadow: `0 0 14px ${system.color}45`,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                          >
+                            <span style={{ color: system.color === '#e8c547' ? '#000' : '#fff', fontSize: 12, fontWeight: 'bold' }}>
+                              {examScore}/10
+                            </span>
+                          </div>
+                        ) : allDone ? (
+                          <>
+                            <motion.div
+                              animate={{ scale: [1, 1.55, 1], opacity: [0.55, 0, 0.55] }}
+                              transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut' }}
+                              style={{
+                                position: 'absolute',
+                                width: 60,
+                                height: 60,
+                                borderRadius: '50%',
+                                border: `2px solid ${system.color}`,
+                              }}
+                            />
+                            <div
+                              style={{
+                                width: 46,
+                                height: 46,
+                                borderRadius: '50%',
+                                background: `linear-gradient(135deg, ${system.color}, ${system.color}cc)`,
+                                border: `2.5px solid ${system.color}`,
+                                boxShadow: `0 0 24px ${system.color}70`,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                position: 'relative',
+                                zIndex: 2,
+                              }}
+                            >
+                              <span style={{ fontSize: 18 }}>🏆</span>
+                            </div>
+                          </>
+                        ) : (
+                          <div
+                            style={{
+                              width: 42,
+                              height: 42,
+                              borderRadius: '50%',
+                              background: 'rgba(255,255,255,0.025)',
+                              border: '1.5px solid rgba(255,255,255,0.07)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                          >
+                            <span style={{ fontSize: 14, opacity: 0.28 }}>🔒</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Content card */}
+                    <div
+                      className="flex-1 min-w-0 rounded-2xl px-4 py-3"
+                      style={{
+                        opacity: allDone ? 1 : 0.3,
+                        background: allDone ? `${system.color}07` : 'transparent',
+                        border: `1px solid ${allDone ? system.color + '25' : 'transparent'}`,
+                      }}
+                    >
+                      <div
+                        className="text-xs font-bold uppercase tracking-widest mb-0.5"
+                        style={{ color: allDone ? `${system.color}bb` : 'rgba(255,255,255,0.18)' }}
+                      >
+                        Zināšanu eksāmens
+                      </div>
+                      <div
+                        className="font-semibold"
+                        style={{ fontSize: 14, color: allDone ? '#fff' : 'rgba(255,255,255,0.18)' }}
+                      >
+                        {examCompleted
+                          ? `Vērtējums: ${examScore}/10`
+                          : allDone
+                          ? 'Gatavs! Pārbaudi zināšanas'
+                          : 'Pabeidz visus līmeņus'}
+                      </div>
+                      <div
+                        className="text-xs"
+                        style={{ color: allDone ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.1)' }}
+                      >
+                        AI saruna · 8–12 jautājumi · Vērtējums 1–10
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })()}
             </div>
           </div>
         </div>
