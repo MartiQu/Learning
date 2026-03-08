@@ -9,6 +9,7 @@ import { Logo } from './Logo';
 const TABS = [
   { label: 'Sākums', path: '/home' },
   { label: 'Kursi', path: '/courses' },
+  { label: 'Spēles', path: '/games' },
 ];
 
 export function AppNavbar() {
