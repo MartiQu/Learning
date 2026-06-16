@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { signInWithGoogle } from '../../lib/firebase';
@@ -16,14 +17,41 @@ const item = (delay: number) => ({
 
 export function AuthModal({ open, onClose }: Props) {
   const navigate = useNavigate();
+  const [error, setError] = useState<string | null>(null);
+  const [isSigningIn, setIsSigningIn] = useState(false);
 
   const handleGoogle = async () => {
+    if (isSigningIn) return;
+
+    setError(null);
+    setIsSigningIn(true);
+
     try {
       await signInWithGoogle();
       onClose();
       navigate('/home');
-    } catch {
-      // lietotājs aizvēra Google popup — nekas
+    } catch (err) {
+      const code = err && typeof err === 'object' && 'code' in err ? String(err.code) : '';
+
+      if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+        return;
+      }
+
+      console.error('Google sign-in failed', err);
+
+      if (code === 'auth/operation-not-allowed') {
+        setError('Firebase Console ieslēdz Google pierakstīšanos sadaļā Authentication > Sign-in method.');
+      } else if (code === 'auth/unauthorized-domain') {
+        setError('Šis domēns nav atļauts Firebase Authentication iestatījumos.');
+      } else if (code === 'auth/invalid-api-key' || code === 'auth/api-key-not-valid') {
+        setError('Firebase konfigurācija nav derīga. Pārbaudi .env.local vērtības.');
+      } else if (code === 'auth/popup-blocked') {
+        setError('Pārlūks bloķēja Google logu. Atļauj popup logus šai lapai.');
+      } else {
+        setError('Neizdevās pierakstīties ar Google. Pārbaudi Firebase iestatījumus un pārlūka konsoli.');
+      }
+    } finally {
+      setIsSigningIn(false);
     }
   };
 
@@ -140,6 +168,7 @@ export function AuthModal({ open, onClose }: Props) {
                 <motion.div {...item(0.22)}>
                   <motion.button
                     onClick={handleGoogle}
+                    disabled={isSigningIn}
                     whileHover={{ scale: 1.015, y: -1 }}
                     whileTap={{ scale: 0.985 }}
                     className="w-full flex items-center justify-center gap-3 px-4 py-3.5 rounded-2xl font-medium text-sm cursor-pointer mb-3 transition-colors"
@@ -163,9 +192,23 @@ export function AuthModal({ open, onClose }: Props) {
                       <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                       <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                     </svg>
-                    Pierakstīties ar Google
+                    {isSigningIn ? 'Atver Google...' : 'Pierakstīties ar Google'}
                   </motion.button>
                 </motion.div>
+
+                {error && (
+                  <motion.p
+                    {...item(0)}
+                    className="text-xs leading-relaxed text-left mb-4 rounded-xl px-3 py-2"
+                    style={{
+                      background: 'rgba(255, 82, 82, 0.10)',
+                      border: '1px solid rgba(255, 82, 82, 0.22)',
+                      color: 'rgba(255,255,255,0.72)',
+                    }}
+                  >
+                    {error}
+                  </motion.p>
+                )}
 
                 {/* Email button (disabled) */}
                 <motion.div {...item(0.27)}>
